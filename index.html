@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rain Tree Fans Tools</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2ec4c6'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gradient-to-br from-primary/20 to-white min-h-screen text-gray-800">
+
+  <!-- HEADER -->
+  <header class="bg-primary text-white p-4 flex justify-between items-center">
+    <h1 class="font-bold text-lg">Rain Tree Fans Tools</h1>
+    <select id="langSelect" class="text-black rounded px-2 py-1">
+      <option value="id">Indonesia</option>
+      <option value="en">English</option>
+      <option value="jp">日本語</option>
+    </select>
+  </header>
+
+  <!-- NAV -->
+  <nav class="flex justify-center gap-4 py-3 bg-white shadow">
+    <button onclick="go('home')">Home</button>
+    <button onclick="go('memberSorter')">Member Sorter</button>
+    <button onclick="go('love')">Ramalan Cinta</button>
+    <button onclick="go('songSorter')">Song Sorter</button>
+  </nav>
+
+  <!-- APP -->
+  <main id="app" class="p-4 max-w-5xl mx-auto"></main>
+
+<script>
+// ================= DATA =================
+const members = [
+  {id:1, name:{id:'Asamiya Hinata', jp:'朝宮日向'}, img:'assets/members/Asamiya_Hinata.jpeg'},
+  {id:2, name:{id:'Ayase Kotori', jp:'綾瀬ことり'}, img:'assets/members/Ayase_Kotori.jpeg'},
+  {id:3, name:{id:'Ichihara Tsumugi', jp:'市原紬希'}, img:'assets/members/Ichihara_Tsumugi.jpeg'},
+  {id:4, name:{id:'Endo Rino', jp:'遠藤莉乃'}, img:'assets/members/Endo_Rino.jpeg'},
+  {id:5, name:{id:'Katase Manaka', jp:'片瀬真花'}, img:'assets/members/Katase_Manaka.jpeg'},
+  {id:6, name:{id:'Kato Shu', jp:'加藤柊'}, img:'assets/members/Kato_Shu.jpeg'},
+  {id:7, name:{id:'Kurosawa Karen', jp:'黒澤禾恋'}, img:'assets/members/Kurosawa_Karen.jpeg'},
+  {id:8, name:{id:'Sato Rica', jp:'佐藤莉華'}, img:'assets/members/Sato_Rica.jpeg'},
+  {id:9, name:{id:'Suzuno Mio', jp:'鈴野みお'}, img:'assets/members/Suzuno_Mio.jpeg'},
+  {id:10, name:{id:'Nakamata Miki', jp:'仲俣美希'}, img:'assets/members/Nakamata_Miki.jpeg'},
+  {id:11, name:{id:'Nagase Mari', jp:'永瀬真梨'}, img:'assets/members/Nagase_Mari.jpeg'},
+  {id:12, name:{id:'Niino Fuka', jp:'新野楓果'}, img:'assets/members/Niino_Fuka.jpeg'},
+  {id:13, name:{id:'Hashimoto Maki', jp:'橋本真希'}, img:'assets/members/Hashimoto_Maki.jpeg'},
+  {id:14, name:{id:'Hayama Rico', jp:'葉山莉瑚'}, img:'assets/members/Hayama_Rico.jpeg'},
+  {id:15, name:{id:'Mizuno Noa', jp:'水野乃愛'}, img:'assets/members/Mizuno_Noa.jpeg'},
+  {id:16, name:{id:'Momose Suzuna', jp:'百瀬紗菜'}, img:'assets/members/Momose_Suzuna.jpeg'},
+  {id:17, name:{id:'Yoshikawa Umi', jp:'吉川海未'}, img:'assets/members/Yoshikawa_Umi.jpeg'}
+];
+
+const songs = [
+  {title:'ILU', url:'https://open.spotify.com/embed/track/4mBzfzsfsDkZ0TzmuJEiZ2'},
+  {title:'Boku no Aurora', url:'https://open.spotify.com/embed/track/5MQMSgVCzhUruxxAkVzK5H'},
+  {title:'Tsumari', url:'https://open.spotify.com/embed/track/5z0W1shvZp5NGGI25Oniy2'},
+  {title:'3 Second Rule', url:'https://open.spotify.com/embed/track/1Cmp9PkwMbcKwJUdJaAee1'},
+  {title:'Renai Henkaku Katsuyou', url:'https://open.spotify.com/embed/track/6MOfU2rS6rBBrRwt78gAsm'},
+  {title:'Sukidayo to Docchi ga Sakini Iunoka?', url:'https://open.spotify.com/embed/track/5Xr6WaDKhUfgULKQLoGvBE'},
+  {title:'Genki Yoho', url:'https://open.spotify.com/embed/track/7jW6T9MCQVgxJJvXyf7K6x'},
+  {title:'Teiten Kansoku', url:'https://open.spotify.com/embed/track/0Tu4xsLz3NJdm8imn7uJtr'}
+];
+
+let lang = 'id';
+
+// ================= ROUTER =================
+function go(page){
+  if(page==='home') home();
+  if(page==='memberSorter') memberSorter();
+  if(page==='love') love();
+  if(page==='songSorter') songSorter();
+}
+
+// ================= HOME =================
+function home(){
+  app.innerHTML = `
+    <section class="text-center">
+      <h2 class="text-3xl font-bold mb-4">Rain Tree Fan Tools</h2>
+      <p class="max-w-xl mx-auto">Website fun tools untuk fans Rain Tree 💎
+      Mainkan sorter, ramalan cinta, dan ranking lagu favoritmu!</p>
+    </section>`;
+}
+
+// ================= LOVE =================
+// ================= LOVE FORTUNE =================
+function love(){
+  app.innerHTML = `
+    <div class="max-w-md mx-auto bg-white p-4 rounded-xl shadow-lg">
+      <h2 class="text-xl font-bold mb-3 text-center">💖 Ramalan Cinta</h2>
+      <input id="yourName" placeholder="Namamu" class="border w-full mb-2 p-2 rounded" />
+      <select id="memberSelect" class="border w-full p-2 rounded mb-3">
+        ${members.map(m=>`<option value="${m.id}">${m.name[lang]}</option>`).join('')}
+      </select>
+      <button onclick="doLove()" class="bg-primary text-white px-4 py-2 rounded w-full font-semibold">Lihat Hasil</button>
+      <div id="loveResult" class="mt-4"></div>
+    </div>`;
+}
+
+function doLove(){
+  const name = document.getElementById('yourName').value || 'Kamu';
+  const percent = Math.floor(Math.random()*51)+50;
+  const hearts = Math.floor(percent/10);
+  const messages = {
+    id:[
+      'Chemistry kalian kuat dan bikin deg-degan 💓',
+      'Hubungan ini punya potensi berkembang indah ✨',
+      'Perasaan kalian selaras tanpa disadari 🌸'
+    ],
+    en:[
+      'Your chemistry feels surprisingly strong 💓',
+      'This bond has beautiful potential ✨',
+      'Your feelings naturally align 🌸'
+    ],
+    jp:[
+      'ふたりの相性はとても良さそうです 💓',
+      'この関係は素敵に発展しそう ✨',
+      '自然と気持ちが重なっています 🌸'
+    ]
+  };
+  const msg = messages[lang][Math.floor(Math.random()*messages[lang].length)];
+
+  loveResult.innerHTML = `
+    <div class="bg-gradient-to-br from-pink-100 to-pink-50 p-4 rounded-xl text-center shadow">
+      <h3 class="font-bold mb-1">${name} × ${members.find(m=>m.id==memberSelect.value).name[lang]}</h3>
+      <div class="text-3xl my-2">${'❤️'.repeat(hearts)}</div>
+      <div class="text-4xl font-extrabold text-pink-500">${percent}%</div>
+      <p class="mt-2">${msg}</p>
+      <button onclick="downloadLove()" class="mt-3 text-sm underline">Unduh Kartu</button>
+    </div>`;
+}
+
+function downloadLove(){
+  const card = document.querySelector('#loveResult > div');
+  if(!card) return;
+  html2canvas(card).then(canvas=>{
+    const link = document.createElement('a');
+    link.download = 'rain-tree-love-result.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+}(){
+  app.innerHTML = `
+    <div class="max-w-md mx-auto bg-white p-4 rounded shadow">
+      <h2 class="text-xl font-bold mb-2">Ramalan Cinta</h2>
+      <input id="yourName" placeholder="Namamu" class="border w-full mb-2 p-2 rounded" />
+      <select id="memberSelect" class="border w-full p-2 rounded mb-2">
+        ${members.map(m=>`<option value="${m.id}">${m.name[lang]}</option>`).join('')}
+      </select>
+      <button onclick="doLove()" class="bg-primary text-white px-4 py-2 rounded w-full">Lihat Hasil</button>
+      <div id="loveResult" class="mt-4"></div>
+    </div>`;
+}
+
+function doLove(){
+  const percent = Math.floor(Math.random()*61)+40;
+  const hearts = Math.floor(percent/10);
+  loveResult.innerHTML = `
+    <div class="bg-pink-100 p-4 rounded text-center">
+      <div class="text-2xl mb-2">${'❤️'.repeat(hearts)}</div>
+      <div class="text-3xl font-bold">${percent}%</div>
+      <p class="mt-2">Hubungan kalian penuh potensi dan chemistry ✨</p>
+    </div>`;
+}
+
+// ================= SORTERS (placeholder logic) =================
+// ================= MEMBER SORTER =================
+let battleList = [];
+let results = {};
+let index = 0;
+let totalBattles = 0;
+let activeToggle = true;
+
+function memberSorter(){
+  battleList = [...members];
+  results = {};
+  members.forEach(m=>results[m.id]=0);
+  shuffle(battleList);
+  index = 0;
+  totalBattles = battleList.length * (battleList.length - 1) / 2;
+
+  app.innerHTML = `
+    <div class="flex justify-between items-center mb-3">
+      <h2 class="text-xl font-bold">Member Sorter</h2>
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked onchange="toggleInactive(this.checked)" />
+        Tampilkan Member Non-Aktif
+      </label>
+    </div>
+    <div class="w-full bg-gray-200 rounded h-3 mb-4">
+      <div id="progress" class="bg-primary h-3 rounded" style="width:0%"></div>
+    </div>
+    <div id="battle" class="grid grid-cols-2 gap-4"></div>
+  `;
+  nextBattle();
+}
+
+function toggleInactive(val){ activeToggle = val; memberSorter(); }
+
+function nextBattle(){
+  if(index >= battleList.length - 1){ return showResult(); }
+  const a = battleList[index];
+  const b = battleList[index+1];
+  document.getElementById('battle').innerHTML = `
+    <button onclick="pick(${a.id},${b.id})" class="bg-white rounded shadow p-2">
+      <img src="${a.img}" class="w-full rounded mb-2" />
+      <div class="text-center font-semibold">${a.name[lang]}</div>
+    </button>
+    <button onclick="pick(${b.id},${a.id})" class="bg-white rounded shadow p-2">
+      <img src="${b.img}" class="w-full rounded mb-2" />
+      <div class="text-center font-semibold">${b.name[lang]}</div>
+    </button>
+  `;
+  document.getElementById('progress').style.width = `${Math.floor((index/totalBattles)*100)}%`;
+}
+
+function pick(win, lose){
+  results[win]++;
+  index++;
+  nextBattle();
+}
+
+function showResult(){
+  const ranking = members
+    .map(m=>({...m, score:results[m.id]}))
+    .sort((a,b)=>b.score-a.score);
+
+  app.innerHTML = `
+    <div id="memberResult">
+    <h2 class="text-xl font-bold mb-4">Hasil Sorter</h2>
+    <button onclick="downloadMemberResult()" class="mb-4 bg-primary text-white px-3 py-2 rounded font-semibold">Unduh Hasil</button>
+    <table class="w-full text-left mb-6">
+      ${ranking.map((m,i)=>`
+        <tr class="border-b">
+          <td class="p-2">${i+1}</td>
+          <td class="p-2"><img src="${m.img}" class="w-12 inline rounded" /></td>
+          <td class="p-2">${m.name[lang]}</td>
+        </tr>`).join('')}
+    </table>
+
+    <div class="grid grid-cols-7 gap-2 mb-4">
+      ${ranking.slice(0,7).map(m=>`<img src="${m.img}" class="rounded" />`).join('')}
+    </div>
+    <div class="grid grid-cols-7 gap-2 mb-4">
+      ${ranking.slice(7,14).map(m=>`<img src="${m.img}" class="rounded" />`).join('')}
+    </div>
+    <div class="grid grid-cols-3 gap-2 justify-center">
+      ${ranking.slice(14,17).map(m=>`<img src="${m.img}" class="rounded" />`).join('')}
+    </div>
+    </div>
+  `;
+}))
+    .sort((a,b)=>b.score-a.score);
+
+  app.innerHTML = `
+    <h2 class="text-xl font-bold mb-4">Hasil Sorter</h2>
+    <button onclick="downloadMemberResult()" class="mb-4 bg-primary text-white px-3 py-2 rounded font-semibold">Unduh Hasil</button>
+    <table class="w-full text-left mb-6">
+      ${ranking.map((m,i)=>`
+        <tr class="border-b">
+          <td class="p-2">${i+1}</td>
+          <td class="p-2"><img src="${m.img}" class="w-12 inline rounded" /></td>
+          <td class="p-2">${m.name[lang]}</td>
+        </tr>`).join('')}
+    </table>
+
+    <div class="grid grid-cols-7 gap-2 mb-4">
+      ${ranking.slice(0,7).map(m=>`<img src="${m.img}" class="rounded" />`).join('')}
+    </div>
+    <div class="grid grid-cols-7 gap-2 mb-4">
+      ${ranking.slice(7,14).map(m=>`<img src="${m.img}" class="rounded" />`).join('')}
+    </div>
+    <div class="grid grid-cols-3 gap-2 justify-center">
+      ${ranking.slice(14,17).map(m=>`<img src="${m.img}" class="rounded" />`).join('')}
+    </div>
+  `;
+}
+
+function downloadMemberResult(){
+  const area = document.getElementById('memberResult');
+  if(!area) return;
+  html2canvas(area).then(canvas=>{
+    const link = document.createElement('a');
+    link.download = 'rain-tree-member-sorter.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+}
+
+function downloadSongResult(){
+  const area = document.getElementById('songResult');
+  if(!area) return;
+  html2canvas(area).then(canvas=>{
+    const link = document.createElement('a');
+    link.download = 'rain-tree-song-sorter.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+}(){
+  app.innerHTML = `<p class="text-center">Member sorter (battle logic) – versi lanjutan bisa ditambahkan</p>`;
+}
+
+// ================= SONG SORTER =================
+let songList = [];
+let songScore = {};
+let songIndex = 0;
+let songTotal = 0;
+
+function songSorter(){
+  songList = [...songs];
+  songScore = {};
+  songs.forEach(s=>songScore[s.title]=0);
+  shuffle(songList);
+  songIndex = 0;
+  songTotal = songList.length * (songList.length - 1) / 2;
+
+  app.innerHTML = `
+    <h2 class="text-xl font-bold mb-2">Song Sorter</h2>
+    <p class="text-sm mb-4">Pilih lagu yang lebih kamu suka 🎧</p>
+    <div class="w-full bg-gray-200 rounded h-3 mb-4">
+      <div id="songProgress" class="bg-primary h-3 rounded" style="width:0%"></div>
+    </div>
+    <div id="songBattle" class="space-y-4"></div>
+  `;
+  nextSongBattle();
+}
+
+function nextSongBattle(){
+  if(songIndex >= songList.length - 1){ return showSongResult(); }
+  const a = songList[songIndex];
+  const b = songList[songIndex+1];
+
+  document.getElementById('songBattle').innerHTML = `
+    <button onclick="pickSong('${a.title}','${b.title}')" class="w-full bg-white rounded shadow p-2">
+      <iframe src="${a.url}" width="100%" height="80" allow="encrypted-media"></iframe>
+    </button>
+    <div class="text-center font-bold">VS</div>
+    <button onclick="pickSong('${b.title}','${a.title}')" class="w-full bg-white rounded shadow p-2">
+      <iframe src="${b.url}" width="100%" height="80" allow="encrypted-media"></iframe>
+    </button>
+  `;
+
+  document.getElementById('songProgress').style.width = `${Math.floor((songIndex/songTotal)*100)}%`;
+}
+
+function pickSong(win, lose){
+  songScore[win]++;
+  songIndex++;
+  nextSongBattle();
+}
+
+function showSongResult(){
+  const ranking = songs
+    .map(s=>({title:s.title, score:songScore[s.title]}))
+    .sort((a,b)=>b.score-a.score);
+
+  app.innerHTML = `
+    <h2 class="text-xl font-bold mb-4">Hasil Song Sorter</h2>
+    <table class="w-full text-left">
+      ${ranking.map((s,i)=>`
+        <tr class="border-b">
+          <td class="p-2">${i+1}</td>
+          <td class="p-2 font-semibold">${s.title}</td>
+        </tr>`).join('')}
+    </table>
+  `;
+}
+(){
+  app.innerHTML = `
+    <h2 class="text-xl font-bold mb-4">Song Sorter</h2>
+    ${songs.map(s=>`
+      <div class="mb-4">
+        <iframe src="${s.url}" width="100%" height="80" allow="encrypted-media"></iframe>
+      </div>`).join('')}`;
+}
+
+// ================= LANG =================
+langSelect.onchange = e => { lang = e.target.value; home(); }
+
+home();
+</script>
+</body>
+</html>
