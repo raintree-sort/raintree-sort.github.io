@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rain Tree Fans Tools</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rain Tree Fans Tools</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
-<script>
-tailwind.config={
-  theme:{extend:{colors:{primary:'#2ec4c6'}}}
-}
-</script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme:{
+        extend:{
+          colors:{ primary:'#2ec4c6' }
+        }
+      }
+    }
+  </script>
 </head>
 
 <body class="bg-gradient-to-br from-primary/20 to-white min-h-screen text-gray-800">
@@ -26,7 +29,8 @@ tailwind.config={
   </select>
 </header>
 
-<nav id="nav" class="flex justify-center gap-4 py-3 bg-white shadow"></nav>
+<nav class="flex justify-center gap-4 py-3 bg-white shadow" id="nav"></nav>
+
 <main id="app" class="p-4 max-w-5xl mx-auto"></main>
 
 <script>
@@ -43,11 +47,7 @@ const t={
   loveBtn:{id:'Lihat Ramalan',en:'See Fortune',jp:'占う'},
   yourName:{id:'Nama kamu',en:'Your name',jp:'あなたの名前'},
   percent:{id:'Kecocokan',en:'Compatibility',jp:'相性'},
-  homeDesc:{
-    id:'Alat seru untuk fans Rain Tree 💎',
-    en:'Fun tools for Rain Tree fans 💎',
-    jp:'Rain Treeファンのための楽しいツール💎'
-  }
+  comingSoon:{id:'Segera hadir',en:'Coming soon',jp:'近日公開'}
 };
 
 /* ================= DATA ================= */
@@ -71,158 +71,153 @@ const members=[
  {id:17,name:{id:'Yoshikawa Umi',en:'Yoshikawa Umi',jp:'吉川海未'},img:'assets/members/Yoshikawa_Umi.jpeg'}
 ];
 
-const songs=[
- {id:1,title:{id:'ILU',en:'ILU',jp:'ILU'},url:'https://open.spotify.com/track/4mBzfzsfsDkZ0TzmuJEiZ2'},
- {id:2,title:{id:'Boku no Aurora',en:'Boku no Aurora',jp:'僕のオーロラ'},url:'https://open.spotify.com/track/5MQMSgVCzhUruxxAkVzK5H'},
- {id:3,title:{id:'Tsumari',en:'Tsumari',jp:'つまり'},url:'https://open.spotify.com/track/5z0W1shvZp5NGGI25Oniy2'},
- {id:4,title:{id:'3 Second Rule',en:'3 Second Rule',jp:'3秒ルール'},url:'https://open.spotify.com/track/1Cmp9PkwMbcKwJUdJaAee1'},
- {id:5,title:{id:"Ren'ai Henkaku Katsuyou",en:"Ren'ai Henkaku Katsuyou",jp:'恋愛変格活用'},url:'https://open.spotify.com/track/6MOfU2rS6rBBrRwt78gAsm'},
- {id:6,title:{id:'Sukidayo to Docchi ga Sakini Iunoka?',en:'Which One Says I Love You First?',jp:'好きだよとどっちが先に言うのか？'},url:'https://open.spotify.com/track/5Xr6WaDKhUfgULKQLoGvBE'},
- {id:7,title:{id:'Genki Yoho',en:'Genki Forecast',jp:'元気予報'},url:'https://open.spotify.com/track/7jW6T9MCQVgxJJvXyf7K6x'},
- {id:8,title:{id:'Teiten Kansoku',en:'Fixed-point Observation',jp:'定点観測'},url:'https://open.spotify.com/track/0Tu4xsLz3NJdm8imn7uJtr'}
-];
-
-let lang='id';
+let lang='jp';
 
 /* ================= UTIL ================= */
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}
-function pairwise(l){const r=[];for(let i=0;i<l.length;i++)for(let j=i+1;j<l.length;j++)r.push([l[i],l[j]]);shuffle(r);return r}
+function pairwise(list){const r=[];for(let i=0;i<list.length;i++)for(let j=i+1;j<list.length;j++)r.push([list[i],list[j]]);shuffle(r);return r}
 
 /* ================= NAV ================= */
 function renderNav(){
- nav.innerHTML=`
- <button onclick="go('home')">${t.home[lang]}</button>
- <button onclick="go('member')">${t.member[lang]}</button>
- <button onclick="go('love')">${t.love[lang]}</button>
- <button onclick="go('song')">${t.song[lang]}</button>`;
+  nav.innerHTML=`
+    <button onclick="go('home')">${t.home[lang]}</button>
+    <button onclick="go('member')">${t.member[lang]}</button>
+    <button onclick="go('love')">${t.love[lang]}</button>
+    <button onclick="go('song')">${t.song[lang]}</button>`;
 }
+
+/* ================= ROUTER ================= */
 function go(p){if(p==='home')home();if(p==='member')memberSorter();if(p==='love')love();if(p==='song')songSorter()}
 
 /* ================= HOME ================= */
-function home(){
- app.innerHTML=`<section class="text-center">
- <h2 class="text-3xl font-bold mb-4">Rain Tree Fan Tools</h2>
- <p>${t.homeDesc[lang]}</p></section>`;
-}
+function home(){app.innerHTML=`<section class='text-center'><h2 class='text-3xl font-bold mb-4'>Rain Tree Fan Tools</h2><p>Fun tools untuk fans Rain Tree 💎</p></section>`}
 
 /* ================= LOVE ================= */
-function love(){
- app.innerHTML=`
- <div class="max-w-md mx-auto bg-white p-4 rounded-xl shadow">
- <h2 class="text-xl font-bold mb-3 text-center">${t.love[lang]}</h2>
- <input id="yourName" class="border w-full mb-2 p-2 rounded" placeholder="${t.yourName[lang]}">
- <select id="memberSelect" class="border w-full p-2 rounded mb-3">
- ${members.map(m=>`<option value="${m.id}">${m.name[lang]}</option>`).join('')}
- </select>
- <button onclick="doLove()" class="bg-primary text-white w-full py-2 rounded">${t.loveBtn[lang]}</button>
- <div id="loveResult" class="mt-4"></div></div>`;
-}
+function love(){app.innerHTML=`<div class='max-w-md mx-auto bg-white p-4 rounded-xl shadow'><h2 class='text-xl font-bold mb-3 text-center'>${t.love[lang]}</h2><input id='yourName' class='border w-full mb-2 p-2 rounded' placeholder='Name'><select id='memberSelect' class='border w-full p-2 rounded mb-3'>${members.map(m=>`<option value='${m.id}'>${m.name[lang]}</option>`).join('')}</select><button onclick='doLove()' class='bg-primary text-white w-full py-2 rounded'>OK</button><div id='loveResult' class='mt-4'></div></div>`}
 
-function doLove(){
- const m=members.find(x=>x.id==memberSelect.value);
- const p=Math.floor(Math.random()*51)+50;
- loveResult.innerHTML=`
- <div class="bg-pink-50 p-4 rounded-xl text-center">
- <img src="${m.img}" class="w-32 mx-auto rounded-full mb-2">
- <h3 class="font-bold">${yourName.value||'You'} × ${m.name[lang]}</h3>
- <div class="text-3xl my-2">${'❤️'.repeat(Math.floor(p/10))}</div>
- <div class="text-4xl font-bold text-pink-500">${p}%</div>
- <div class="text-sm opacity-70">${t.percent[lang]}</div></div>`;
-}
+function doLove(){const m=members.find(x=>x.id==memberSelect.value);const p=Math.floor(Math.random()*51)+50;loveResult.innerHTML=`<div class='bg-pink-50 p-4 rounded-xl text-center'><img src='${m.img}' class='w-32 mx-auto rounded-full mb-2'><h3 class='font-bold'>${yourName.value||'You'} × ${m.name[lang]}</h3><div class='text-3xl my-2'>${'❤️'.repeat(Math.floor(p/10))}</div><div class='text-4xl font-bold text-pink-500'>${p}%</div></div>`}
 
 /* ================= MEMBER SORTER ================= */
-let battles=[],bIndex=0,score={};
+let battles=[],bIndex=0,score={}
+function memberSorter(){battles=pairwise([...members]);score={};members.forEach(m=>score[m.id]=0);bIndex=0;app.innerHTML=`<h2 class='text-xl font-bold mb-2'>${t.member[lang]}</h2><div class='w-full bg-gray-200 h-3 rounded mb-3'><div id='prog' class='bg-primary h-3 rounded'></div></div><div id='battle' class='grid grid-cols-2 gap-4'></div>`;nextBattle()}
 
-function memberSorter(){
- battles=pairwise([...members]);score={};members.forEach(m=>score[m.id]=0);bIndex=0;
- app.innerHTML=`
- <h2 class="text-xl font-bold mb-2">${t.member[lang]}</h2>
- <div class="w-full bg-gray-200 h-3 rounded mb-3"><div id="prog" class="bg-primary h-3 rounded"></div></div>
- <div id="battle" class="grid grid-cols-2 gap-4"></div>`;
- nextBattle();
-}
-
-function nextBattle(){
- if(bIndex>=battles.length)return showMemberResult();
- const[a,b]=battles[bIndex];
- prog.style.width=Math.floor((bIndex/battles.length)*100)+'%';
- battle.innerHTML=`
- <button onclick="pickMember(${a.id})" class="bg-white rounded-xl shadow p-2">
- <img src="${a.img}" class="rounded mb-2">${a.name[lang]}</button>
- <button onclick="pickMember(${b.id})" class="bg-white rounded-xl shadow p-2">
- <img src="${b.img}" class="rounded mb-2">${b.name[lang]}</button>`;
-}
-function pickMember(id){score[id]++;bIndex++;nextBattle();}
+function nextBattle(){if(bIndex>=battles.length)return showMemberResult();const[a,b]=battles[bIndex];prog.style.width=Math.floor((bIndex/battles.length)*100)+'%';battle.innerHTML=`
+    <button onclick='pickMember(${a.id})' class='bg-white rounded-xl shadow p-2'>
+      <img src='${a.img}' class='mb-2 w-full aspect-square object-cover rounded-lg'>
+      ${a.name[lang]}
+    </button>
+    <button onclick='pickMember(${b.id})' class='bg-white rounded-xl shadow p-2'>
+      <img src='${b.img}' class='mb-2 w-full aspect-square object-cover rounded-lg'>
+      ${b.name[lang]}
+    </button>
+    <button onclick='pickDraw(${a.id},${b.id})' class='col-span-2 bg-gray-200 hover:bg-gray-300 rounded-xl py-2 font-semibold'>DRAW</button>`}
+function pickMember(id){score[id]++;bIndex++;nextBattle()}
+function pickDraw(a,b){score[a]++;score[b]++;bIndex++;nextBattle()}
 
 function showMemberResult(){
- const r=[...members].sort((a,b)=>score[b.id]-score[a.id]);
- app.innerHTML=`
- <div id="resultArea" class="bg-white rounded-xl shadow p-4">
- <h2 class="text-xl font-bold mb-4 text-center">${t.result[lang]}</h2>
- <table class="w-full border-collapse">
- ${r.map((m,i)=>`
- <tr class="${i<3?'bg-yellow-50':''} border-b">
- <td class="p-2 text-center font-bold">${i===0?'👑':''} ${i+1}</td>
- <td class="p-2"><img src="${m.img}" class="w-12 h-12 rounded-full inline mr-2 border-2 ${i===0?'border-yellow-400':'border-primary'}">${m.name[lang]}</td>
- </tr>`).join('')}</table></div>
- <button onclick="downloadResult()" class="mt-4 bg-primary text-white px-4 py-2 rounded mx-auto block">${t.download[lang]}</button>`;
+  const r=[...members].sort((a,b)=>score[b.id]-score[a.id]);
+  const left=r.slice(0,9);
+  const right=r.slice(9);
+
+  app.innerHTML=`
+  <div id='resultArea' class='bg-white rounded-xl shadow p-4'>
+    <h2 class='text-xl font-bold mb-4 text-center'>${t.result[lang]}</h2>
+    <div class='grid md:grid-cols-2 gap-6'>
+      ${[left,right].map((group,gIndex)=>`
+        <table class='w-full border-collapse'>
+          ${group.map((m,i)=>{
+            const rank=gIndex===0?i+1:i+10;
+            return `
+            <tr class='${rank<=3?'bg-yellow-50':''} border-b'>
+              <td class='p-2 text-center font-bold w-12'>${rank===1?'👑':''}${rank}</td>
+              <td class='p-2'>
+                <div class='flex items-center gap-3'>
+                  <img src='${m.img}' class='w-16 h-16 object-cover rounded-lg border-2 ${rank===1?'border-yellow-400':'border-primary'}'>
+                  <span class='font-semibold'>${m.name[lang]}</span>
+                </div>
+              </td>
+            </tr>`}).join('')}
+        </table>`).join('')}
+    </div>
+  </div>
+  <button onclick='downloadResult()' class='mt-4 bg-primary text-white px-4 py-2 rounded mx-auto block'>${t.download[lang]}</button>`;
 }
 
 function downloadResult(){
- html2canvas(resultArea).then(c=>{
- const a=document.createElement('a');
- a.href=c.toDataURL();a.download='rain-tree-member-sorter.png';a.click();
-});
+  html2canvas(document.getElementById('resultArea')).then(c=>{
+    const a=document.createElement('a');
+    a.href=c.toDataURL('image/png');
+    a.download='rain-tree-sorter.png';
+    a.click();
+  });
 }
 
+/* ================= SONG SORTER (stub) ================= */
 /* ================= SONG SORTER ================= */
+const songs=[
+ {id:1,title:'ILU',url:'https://open.spotify.com/track/4mBzfzsfsDkZ0TzmuJEiZ2'},
+ {id:2,title:'Boku no Aurora',url:'https://open.spotify.com/track/5MQMSgVCzhUruxxAkVzK5H'},
+ {id:3,title:'Tsumari',url:'https://open.spotify.com/track/5z0W1shvZp5NGGI25Oniy2'},
+ {id:4,title:'3 Second Rule',url:'https://open.spotify.com/track/1Cmp9PkwMbcKwJUdJaAee1'},
+ {id:5,title:"Ren'ai Henkaku Katsuyou",url:'https://open.spotify.com/track/6MOfU2rS6rBBrRwt78gAsm'},
+ {id:6,title:'Sukidayo to Docchi ga Sakini Iunoka?',url:'https://open.spotify.com/track/5Xr6WaDKhUfgULKQLoGvBE'},
+ {id:7,title:'Genki Yoho',url:'https://open.spotify.com/track/7jW6T9MCQVgxJJvXyf7K6x'},
+ {id:8,title:'Teiten Kansoku',url:'https://open.spotify.com/track/0Tu4xsLz3NJdm8imn7uJtr'}
+];
+
 let songBattles=[],songIndex=0,songScore={};
 
 function songSorter(){
- songBattles=pairwise([...songs]);songScore={};songs.forEach(s=>songScore[s.id]=0);songIndex=0;
- app.innerHTML=`
- <h2 class="text-xl font-bold mb-2">${t.song[lang]}</h2>
- <div class="w-full bg-gray-200 h-3 rounded mb-3"><div id="songProg" class="bg-primary h-3 rounded"></div></div>
- <div id="songBattle"></div>`;
- nextSongBattle();
+  songBattles=pairwise([...songs]);
+  songScore={}; songs.forEach(s=>songScore[s.id]=0);
+  songIndex=0;
+  app.innerHTML=`<h2 class='text-xl font-bold mb-2'>${t.song[lang]}</h2>
+  <div class='w-full bg-gray-200 h-3 rounded mb-3'><div id='songProg' class='bg-primary h-3 rounded'></div></div>
+  <div id='songBattle' class='space-y-4'></div>`;
+  nextSongBattle();
 }
 
 function nextSongBattle(){
- if(songIndex>=songBattles.length)return showSongResult();
- const[a,b]=songBattles[songIndex];
- songProg.style.width=Math.floor((songIndex/songBattles.length)*100)+'%';
- songBattle.innerHTML=`
- <div class="bg-white rounded-xl shadow p-4 text-center">
- <p class="font-bold mb-2">${t.pickSong[lang]}</p>
- <button onclick="pickSong(${a.id})" class="block w-full mb-2 bg-primary/10 rounded p-2">${a.title[lang]}</button>
- <button onclick="pickSong(${b.id})" class="block w-full bg-primary/10 rounded p-2">${b.title[lang]}</button>
- </div>`;
+  if(songIndex>=songBattles.length) return showSongResult();
+  const[a,b]=songBattles[songIndex];
+  songProg.style.width=Math.floor((songIndex/songBattles.length)*100)+'%';
+  songBattle.innerHTML=`
+    <div class='bg-white rounded-xl shadow p-4'>
+      <p class='font-bold mb-2 text-center'>Pilih lagu favorit</p>
+      <button onclick='pickSong(${a.id})' class='w-full mb-2 bg-primary/10 rounded p-2 font-semibold'>${a.title}</button>
+      <button onclick='pickSong(${b.id})' class='w-full bg-primary/10 rounded p-2 font-semibold'>${b.title}</button>
+    </div>`;
 }
-function pickSong(id){songScore[id]++;songIndex++;nextSongBattle();}
+
+function pickSong(id){ songScore[id]++; songIndex++; nextSongBattle(); }
 
 function showSongResult(){
- const r=[...songs].sort((a,b)=>songScore[b.id]-songScore[a.id]);
- app.innerHTML=`
- <div id="songResultArea" class="bg-white rounded-xl shadow p-4">
- <h2 class="text-xl font-bold mb-4 text-center">${t.result[lang]}</h2>
- <table class="w-full border-collapse">
- ${r.map((s,i)=>`
- <tr class="${i<3?'bg-emerald-50':''} border-b">
- <td class="p-2 text-center font-bold">${i===0?'👑':''} ${i+1}</td>
- <td class="p-2 font-semibold">${s.title[lang]}</td>
- <td class="p-2 text-right"><a href="${s.url}" target="_blank" class="text-primary underline">Spotify</a></td>
- </tr>`).join('')}</table></div>
- <button onclick="downloadSongResult()" class="mt-4 bg-primary text-white px-4 py-2 rounded mx-auto block">${t.download[lang]}</button>`;
+  const r=[...songs].sort((a,b)=>songScore[b.id]-songScore[a.id]);
+  app.innerHTML=`
+  <div id='songResultArea' class='bg-white rounded-xl shadow p-4'>
+    <h2 class='text-xl font-bold mb-4 text-center'>${t.result[lang]}</h2>
+    <table class='w-full border-collapse'>
+      ${r.map((s,i)=>`
+        <tr class='${i<3?'bg-emerald-50':''} border-b'>
+          <td class='p-2 text-center font-bold'>${i===0?'👑':''} ${i+1}</td>
+          <td class='p-2 font-semibold'>${s.title}</td>
+          <td class='p-2 text-right'><a href='${s.url}' target='_blank' class='text-primary underline'>Spotify</a></td>
+        </tr>`).join('')}
+    </table>
+  </div>
+  <button onclick='downloadSongResult()' class='mt-4 bg-primary text-white px-4 py-2 rounded mx-auto block'>${t.download[lang]}</button>`;
 }
 
 function downloadSongResult(){
- html2canvas(songResultArea).then(c=>{
- const a=document.createElement('a');
- a.href=c.toDataURL();a.download='rain-tree-song-sorter.png';a.click();
-});
+  html2canvas(document.getElementById('songResultArea')).then(c=>{
+    const a=document.createElement('a');
+    a.href=c.toDataURL('image/png');
+    a.download='rain-tree-song-sorter.png';
+    a.click();
+  });
 }
 
-langSelect.onchange=e=>{lang=e.target.value;renderNav();home();}
+langSelect.onchange=e=>{lang=e.target.value;renderNav();home()}
 renderNav();home();
 </script>
 </body>
