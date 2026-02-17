@@ -4,51 +4,188 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rain Tree Fans Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script>tailwind.config={theme:{extend:{colors:{primary:'#2ec4c6'}}}}</script>
+<script>
+  tailwind.config={theme:{extend:{
+    colors:{primary:'#2ec4c6', primaryDark:'#1fa8aa', primaryLight:'#e6fafa'},
+    fontFamily:{sans:['Plus Jakarta Sans','sans-serif']}
+  }}}
+</script>
 <style>
-  .stage-bg{
-    background:radial-gradient(circle at center bottom,rgba(46,196,198,0.6),transparent 70%),
-    linear-gradient(to top,#0f2027,#203a43,#2c5364);
-    padding:40px 20px;border-radius:20px;
+  *{font-family:'Plus Jakarta Sans',sans-serif;}
+
+  /* ── Header ── */
+  .header-bg{
+    background:linear-gradient(135deg,#1a9ea0 0%,#2ec4c6 50%,#4dd9db 100%);
+    position:relative;overflow:hidden;
   }
-  .front-row{opacity:1;}
-  .back-row{opacity:0.92;}
-  .center-glow{box-shadow:0 0 20px rgba(255,215,0,0.9),0 0 40px rgba(255,215,0,0.6);border:3px solid gold;}
-  .battle-card{transition:transform .15s,box-shadow .15s;}
-  .battle-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(46,196,198,0.35);}
-  .rank-1{background:linear-gradient(135deg,#ffd700,#ffb300);}
-  .rank-2{background:linear-gradient(135deg,#e8e8e8,#bdbdbd);}
-  .rank-3{background:linear-gradient(135deg,#cd7f32,#a05a2c);}
-  .rank-other{background:#f9f9f9;}
-  .progress-bar{transition:width .5s ease;}
-  .nav-btn{padding:8px 16px;border-radius:8px;font-weight:600;transition:background .2s;font-size:0.875rem;}
-  .nav-btn:hover{background:rgba(46,196,198,0.15);}
-  .nav-btn.active{background:rgba(46,196,198,0.2);color:#2ec4c6;}
+  .header-bg::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(ellipse at top right,rgba(255,255,255,0.15),transparent 60%);
+  }
+
+  /* ── Nav ── */
+  .nav-wrap{
+    background:#fff;
+    border-bottom:1px solid #e8f8f8;
+    box-shadow:0 2px 12px rgba(46,196,198,0.08);
+  }
+  .nav-btn{
+    padding:8px 18px;border-radius:999px;font-weight:600;font-size:0.82rem;
+    color:#6b7280;letter-spacing:0.01em;transition:all .2s;
+  }
+  .nav-btn:hover{background:#e6fafa;color:#1fa8aa;}
+  .nav-btn.active{
+    background:linear-gradient(135deg,#2ec4c6,#1fa8aa);
+    color:#fff;box-shadow:0 2px 10px rgba(46,196,198,0.35);
+  }
+
+  /* ── Card base ── */
+  .card{background:#fff;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,0.07);}
+  .card-hover{transition:transform .18s,box-shadow .18s;}
+  .card-hover:hover{transform:translateY(-5px);box-shadow:0 8px 28px rgba(46,196,198,0.2);}
+
+  /* ── Buttons ── */
+  .btn-primary{
+    background:linear-gradient(135deg,#2ec4c6,#1a9ea0);
+    color:#fff;font-weight:700;border-radius:12px;
+    padding:10px 24px;transition:all .2s;letter-spacing:0.01em;
+    box-shadow:0 2px 12px rgba(46,196,198,0.3);
+  }
+  .btn-primary:hover{opacity:0.9;box-shadow:0 4px 18px rgba(46,196,198,0.4);}
+  .btn-secondary{
+    background:#fff;color:#374151;font-weight:600;border-radius:12px;
+    padding:10px 24px;border:1.5px solid #e5e7eb;transition:all .2s;
+  }
+  .btn-secondary:hover{border-color:#2ec4c6;color:#1fa8aa;}
+
+  /* ── Battle card ── */
+  .battle-card{
+    background:#fff;border-radius:16px;overflow:hidden;cursor:pointer;
+    border:2px solid transparent;transition:all .18s;
+    box-shadow:0 2px 12px rgba(0,0,0,0.07);
+  }
+  .battle-card:hover{
+    border-color:#2ec4c6;transform:translateY(-4px);
+    box-shadow:0 8px 24px rgba(46,196,198,0.25);
+  }
+
+  /* ── Progress bar ── */
+  .progress-track{background:#e6fafa;border-radius:999px;height:8px;}
+  .progress-fill{
+    background:linear-gradient(90deg,#2ec4c6,#1fa8aa);
+    border-radius:999px;height:8px;transition:width .5s ease;
+  }
+
+  /* ── Rank badge (opsi 2: left border + badge, bukan full-row color) ── */
+  .rank-row{background:#fff;border-bottom:1px solid #f3f4f6;}
+  .rank-row:last-child{border-bottom:none;}
+  .rank-row.top{background:#fafffe;}
+
+  /* Badge bulat untuk nomor rank */
+  .badge-1{
+    background:linear-gradient(135deg,#F5E6A3,#C9A84C);
+    color:#7a5a00;font-weight:800;
+    box-shadow:0 2px 8px rgba(201,168,76,0.4),inset 0 1px 0 rgba(255,255,255,0.5);
+    border:1.5px solid rgba(201,168,76,0.6);
+  }
+  .badge-2{
+    background:linear-gradient(135deg,#E8E8E8,#9E9E9E);
+    color:#4a4a4a;font-weight:800;
+    box-shadow:0 2px 8px rgba(158,158,158,0.4),inset 0 1px 0 rgba(255,255,255,0.6);
+    border:1.5px solid rgba(158,158,158,0.5);
+  }
+  .badge-3{
+    background:linear-gradient(135deg,#E8C49A,#8B5E3C);
+    color:#fff;font-weight:800;
+    box-shadow:0 2px 8px rgba(139,94,60,0.4),inset 0 1px 0 rgba(255,255,255,0.25);
+    border:1.5px solid rgba(139,94,60,0.5);
+  }
+  .badge-other{
+    background:#f3f4f6;color:#9ca3af;font-weight:700;
+  }
+
+  /* Left accent border untuk top 3 */
+  .accent-1{border-left:4px solid #C9A84C;}
+  .accent-2{border-left:4px solid #9E9E9E;}
+  .accent-3{border-left:4px solid #8B5E3C;}
+
+  /* ── Senbatsu stage ── */
+  .stage-bg{
+    background:radial-gradient(ellipse at center bottom,rgba(46,196,198,0.5),transparent 65%),
+    linear-gradient(to top,#0b1a23,#1a3040,#243d50);
+    padding:32px 16px 28px;border-radius:20px;
+  }
+  .center-glow{
+    box-shadow:0 0 18px rgba(255,215,0,0.85),0 0 36px rgba(255,215,0,0.4);
+    border:2.5px solid rgba(255,215,0,0.9);
+  }
+
+  /* ── Spotify ── */
   .spotify-frame{border-radius:12px;width:100%;display:block;}
+
+  /* ── Song battle card ── */
+  .song-card{
+    background:#fff;border-radius:16px;padding:16px;
+    border:2px solid transparent;transition:all .18s;
+    box-shadow:0 2px 12px rgba(0,0,0,0.06);
+  }
+  .song-card:hover{border-color:#2ec4c6;box-shadow:0 4px 20px rgba(46,196,198,0.18);}
+
+  /* ── Page bg ── */
+  body{background:#f0fafa;min-height:100vh;}
+
+  /* ── Input ── */
+  .input-base{
+    border:1.5px solid #e5e7eb;border-radius:10px;padding:9px 13px;
+    font-size:0.9rem;width:100%;outline:none;transition:border .2s;
+    font-family:'Plus Jakarta Sans',sans-serif;
+  }
+  .input-base:focus{border-color:#2ec4c6;box-shadow:0 0 0 3px rgba(46,196,198,0.12);}
+
+  /* ── Modal ── */
+  .modal-inner{
+    background:#fff;border-radius:20px;padding:20px;
+    max-width:640px;width:100%;max-height:82vh;overflow-y:auto;position:relative;
+    box-shadow:0 20px 60px rgba(0,0,0,0.2);
+  }
 </style>
 </head>
-<body class="bg-gradient-to-br from-primary/10 to-white min-h-screen">
+<body>
 
-<header class="bg-primary text-white p-4 flex justify-between items-center shadow-md">
-  <h1 class="font-bold text-lg tracking-wide">🌧️ Rain Tree Fans Tools</h1>
-  <select id="langSelect" class="text-black rounded px-2 py-1 text-sm" onchange="changeLang(this.value)">
+<!-- HEADER -->
+<header class="header-bg text-white px-5 py-4 flex justify-between items-center relative z-10">
+  <div class="flex items-center gap-2.5">
+    <span class="text-2xl">🌧️</span>
+    <span class="font-extrabold text-lg tracking-tight">Rain Tree Fans Tools</span>
+  </div>
+  <select id="langSelect" onchange="changeLang(this.value)"
+    class="text-gray-700 rounded-lg px-3 py-1.5 text-sm font-semibold bg-white/90 border-0 outline-none cursor-pointer">
     <option value="jp" selected>日本語</option>
     <option value="id">Indonesia</option>
     <option value="en">English</option>
   </select>
 </header>
 
-<nav id="nav" class="flex flex-wrap justify-center gap-2 py-3 bg-white shadow-sm"></nav>
+<!-- NAV -->
+<div class="nav-wrap">
+  <nav id="nav" class="flex flex-wrap justify-center gap-1.5 py-2.5 px-4 max-w-5xl mx-auto"></nav>
+</div>
+
+<!-- MAIN -->
 <main id="app" class="p-4 max-w-5xl mx-auto"></main>
 
 <!-- SENBATSU MEMBER MODAL -->
-<div id="memberModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
-  <div class="bg-white rounded-xl p-4 max-w-4xl w-full max-h-[80vh] overflow-y-auto relative mx-4">
-    <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-black text-xl font-bold">✕</button>
-    <h3 class="text-lg font-bold mb-4 text-center">Select Member</h3>
-    <div id="memberGrid" class="grid grid-cols-3 md:grid-cols-5 gap-4"></div>
+<div id="memberModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+  <div class="modal-inner">
+    <button onclick="closeModal()"
+      class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full
+             bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition text-sm">✕</button>
+    <h3 class="text-base font-bold mb-4 text-gray-800">Select Member</h3>
+    <div id="memberGrid" class="grid grid-cols-3 md:grid-cols-5 gap-3"></div>
   </div>
 </div>
 
@@ -71,23 +208,18 @@ const T = {
   result:     {id:'Hasil',         en:'Result',         jp:'結果'},
   rank:       {id:'Peringkat',     en:'Rank',           jp:'順位'},
   name:       {id:'Nama',          en:'Name',           jp:'名前'},
-  score:      {id:'Skor',          en:'Score',          jp:'スコア'},
-  wins:       {id:'Menang',        en:'Wins',           jp:'勝利'},
-  losses:     {id:'Kalah',         en:'Losses',         jp:'敗北'},
-  draws:      {id:'Seri',          en:'Draws',          jp:'引分'},
   reset:      {id:'Ulangi',        en:'Reset',          jp:'リセット'},
   round:      {id:'Ronde',         en:'Round',          jp:'ラウンド'},
   progress:   {id:'Progres',       en:'Progress',       jp:'進捗'},
   chooseMem:  {id:'Pilih yang lebih kamu suka!', en:'Pick your favorite!', jp:'好きな方を選んでね！'},
   chooseSong: {id:'Pilih lagu favoritmu!', en:'Pick your favorite song!', jp:'好きな曲を選んでね！'},
-  pick:       {id:'Pilih!',        en:'Pick!',          jp:'これ！'},
+  pick:       {id:'Pilih',         en:'Pick',           jp:'選ぶ'},
   of:         {id:'dari',          en:'of',             jp:'/'},
   songLabel:  {id:'lagu',          en:'songs',          jp:'曲'},
   top3:       {id:'Top 3 Preview', en:'Top 3 Preview',  jp:'トップ3プレビュー'},
   songTitle:  {id:'Judul',         en:'Title',          jp:'曲名'},
 };
-
-function tr(key){ return T[key] ? T[key][lang] : key; }
+function tr(key){ return T[key]?T[key][lang]:key; }
 
 /* =====================================================
    MEMBERS
@@ -142,7 +274,7 @@ function changeLang(l){ lang=l; renderNav(); }
 
 function go(p){
   currentPage=p; renderNav();
-  ({home,member:memberSorterPage,song:songSorterPage,senbatsu})[p]?.();
+  ({home, member:memberSorterPage, song:songSorterPage, senbatsu})[p]?.();
 }
 
 /* =====================================================
@@ -150,24 +282,31 @@ function go(p){
    ===================================================== */
 function home(){
   document.getElementById('app').innerHTML = `
-    <div class="text-center mt-14">
-      <div class="text-5xl mb-3">🌧️</div>
-      <div class="text-3xl font-bold text-primary mb-1">Rain Tree Fan Tools</div>
-      <p class="text-gray-400 mb-10 text-sm">ファンのためのファンツール</p>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
-        ${[
-          {p:'member',  icon:'👑', label:tr('member')},
-          {p:'song',    icon:'🎵', label:tr('song')},
-          {p:'senbatsu',icon:'⭐', label:tr('senbatsu')},
-        ].map(item=>`
-          <button onclick="go('${item.p}')"
-            class="bg-white rounded-2xl p-6 shadow hover:shadow-lg border border-primary/20
-                   hover:-translate-y-1 transition text-center">
-            <div class="text-4xl mb-2">${item.icon}</div>
-            <div class="font-semibold text-sm text-gray-700">${item.label}</div>
-          </button>
-        `).join('')}
+    <div class="text-center mt-12 mb-6">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl
+                  bg-white shadow-lg mb-4" style="box-shadow:0 4px 20px rgba(46,196,198,0.2)">
+        <span class="text-3xl">🌧️</span>
       </div>
+      <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight mb-1">Rain Tree Fan Tools</h1>
+      <p class="text-gray-400 text-sm font-medium">ファンのためのファンツール</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
+      ${[
+        {p:'member',  icon:'👑', label:tr('member'),  sub:{id:'Battle & ranking member',en:'Battle & ranking member',jp:'メンバーをバトルでランキング'}},
+        {p:'song',    icon:'🎵', label:tr('song'),    sub:{id:'Battle lagu favoritmu', en:'Battle your favorite songs',jp:'曲をバトルでランキング'}},
+        {p:'senbatsu',icon:'⭐', label:tr('senbatsu'),sub:{id:'Susun formasi impianmu', en:'Build your dream formation',jp:'夢のフォーメーションを組もう'}},
+      ].map(item=>`
+        <button onclick="go('${item.p}')"
+          class="card card-hover p-6 text-center group cursor-pointer
+                 border border-transparent hover:border-primary/30">
+          <div class="w-12 h-12 rounded-xl bg-primaryLight flex items-center justify-center
+                      mx-auto mb-3 group-hover:bg-primary/15 transition text-2xl">
+            ${item.icon}
+          </div>
+          <div class="font-bold text-gray-800 text-sm mb-1">${item.label}</div>
+          <div class="text-xs text-gray-400 leading-snug">${item.sub[lang]}</div>
+        </button>
+      `).join('')}
     </div>`;
 }
 
@@ -176,8 +315,7 @@ function home(){
    ===================================================== */
 function createSwiss(items){
   const players = items.map(item=>({
-    ...item,
-    wins:0, losses:0, draws:0, score:0, opponents:[], buchholz:0
+    ...item, wins:0, losses:0, draws:0, score:0, opponents:[], buchholz:0
   }));
   const totalRounds = Math.max(Math.ceil(Math.log2(players.length))*2, 3);
   const totalBattles = Math.floor(players.length/2) * totalRounds;
@@ -187,8 +325,7 @@ function createSwiss(items){
 function swissPair(state){
   const sorted = [...state.players].sort((a,b)=>
     b.score!==a.score ? b.score-a.score :
-    b.buchholz!==a.buchholz ? b.buchholz-a.buchholz :
-    Math.random()-0.5
+    b.buchholz!==a.buchholz ? b.buchholz-a.buchholz : Math.random()-0.5
   );
   const paired=new Set(), pairs=[];
   for(let i=0;i<sorted.length;i++){
@@ -216,69 +353,65 @@ function swissPair(state){
 }
 
 function swissApply(state, winnerId, loserId, isDraw){
-  const w = state.players.find(p=>p.id===winnerId);
-  const l = state.players.find(p=>p.id===loserId);
+  const w=state.players.find(p=>p.id===winnerId);
+  const l=state.players.find(p=>p.id===loserId);
   if(!w||!l) return;
-  if(isDraw){
-    w.draws++; w.score+=1;
-    l.draws++; l.score+=1;
-  } else {
-    w.wins++;  w.score+=2;
-    l.losses++;
-  }
+  if(isDraw){ w.draws++; w.score+=1; l.draws++; l.score+=1; }
+  else { w.wins++; w.score+=2; l.losses++; }
   if(!w.opponents.includes(l.id)) w.opponents.push(l.id);
   if(!l.opponents.includes(w.id)) l.opponents.push(w.id);
   state.players.forEach(p=>{
-    p.buchholz = p.opponents.reduce((s,oid)=>{
-      const opp=state.players.find(x=>x.id===oid);
-      return s+(opp?opp.score:0);
+    p.buchholz=p.opponents.reduce((s,oid)=>{
+      const o=state.players.find(x=>x.id===oid); return s+(o?o.score:0);
     },0);
   });
 }
 
 function swissRanking(state){
   return [...state.players].sort((a,b)=>
-    b.score!==a.score ? b.score-a.score :
-    b.buchholz!==a.buchholz ? b.buchholz-a.buchholz :
-    b.wins!==a.wins ? b.wins-a.wins : 0
+    b.score!==a.score?b.score-a.score:
+    b.buchholz!==a.buchholz?b.buchholz-a.buchholz:
+    b.wins!==a.wins?b.wins-a.wins:0
   );
 }
 
-function swissProgress(state){
-  const done = (state.currentRound-1)*Math.floor(state.players.length/2) + state.pairIdx;
-  return Math.min(Math.round((done/state.totalBattles)*100), 99);
-}
-
 function swissNextPair(state){
-  if(state.pairIdx >= state.pairs.length){
+  if(state.pairIdx>=state.pairs.length){
     state.currentRound++;
-    if(state.currentRound > state.totalRounds){ state.done=true; return false; }
-    state.pairs = swissPair(state);
-    state.pairIdx = 0;
-    if(state.pairs.length===0){ state.done=true; return false; }
+    if(state.currentRound>state.totalRounds){state.done=true;return false;}
+    state.pairs=swissPair(state); state.pairIdx=0;
+    if(state.pairs.length===0){state.done=true;return false;}
   }
   return true;
 }
 
-/* ----- Shared progress bar HTML ----- */
+/* ── Progress bar ── */
 function progressBar(state){
-  const pct = swissProgress(state);
+  const done=(state.currentRound-1)*Math.floor(state.players.length/2)+state.pairIdx;
+  const pct=Math.min(Math.round((done/state.totalBattles)*100),99);
   return `
-    <div class="bg-white rounded-xl shadow p-4 mb-4">
-      <div class="flex justify-between text-sm text-gray-500 mb-1">
-        <span>${tr('round')} ${state.currentRound} ${tr('of')} ${state.totalRounds}</span>
-        <span>${tr('progress')}: ${pct}%</span>
+    <div class="card p-4 mb-5">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          ${tr('round')} ${state.currentRound} ${tr('of')} ${state.totalRounds}
+        </span>
+        <span class="text-xs font-bold text-primary">${pct}%</span>
       </div>
-      <div class="w-full bg-gray-200 rounded-full h-3">
-        <div class="bg-primary h-3 rounded-full progress-bar" style="width:${pct}%"></div>
+      <div class="progress-track">
+        <div class="progress-fill" style="width:${pct}%"></div>
       </div>
     </div>`;
 }
 
-/* ----- Shared result table ----- */
-function medal(r){ return r===1?'👑':r===2?'🥈':r===3?'🥉':String(r); }
-function rkClass(r){ return r===1?'rank-1':r===2?'rank-2':r===3?'rank-3':'rank-other'; }
-function rkTxt(r){ return r<=3?'text-white font-semibold':'text-gray-700'; }
+/* ── Rank badge ── */
+function rankBadge(r){
+  const cls = r===1?'badge-1':r===2?'badge-2':r===3?'badge-3':'badge-other';
+  const sym = r===1?'👑':r===2?'②':r===3?'③':String(r);
+  // untuk r<=3 pakai emoji mahkota, untuk 2&3 pakai teks angka dengan style
+  const label = r===1?'1':r===2?'2':r===3?'3':String(r);
+  return `<span class="${cls} inline-flex items-center justify-center w-8 h-8 rounded-full text-sm">${r<=3&&r>1?label:r===1?'👑':label}</span>`;
+}
+function accentClass(r){ return r===1?'accent-1':r===2?'accent-2':r===3?'accent-3':''; }
 
 /* =====================================================
    MEMBER SORTER
@@ -288,105 +421,95 @@ let MS = null;
 function memberSorterPage(){
   MS=null;
   document.getElementById('app').innerHTML=`
-    <div class="bg-white rounded-2xl shadow p-8 max-w-md mx-auto text-center">
-      <h2 class="text-2xl font-bold text-primary mb-1">👑 ${tr('member')}</h2>
-      <p class="text-gray-400 text-sm mb-2">Swiss system · ${members.length} members</p>
-      <p class="text-gray-400 text-xs mb-8">
+    <div class="card p-8 max-w-md mx-auto text-center">
+      <div class="w-14 h-14 rounded-2xl bg-yellow-50 flex items-center justify-center mx-auto mb-4 text-3xl">👑</div>
+      <h2 class="text-xl font-extrabold text-gray-800 mb-1">${tr('member')}</h2>
+      <p class="text-gray-400 text-sm mb-1 font-medium">Swiss System · ${members.length} members</p>
+      <p class="text-gray-400 text-xs mb-7">
         ${lang==='jp'?'好きなメンバーを1対1で選んでいこう！':
           lang==='id'?'Pilih member favoritmu satu per satu!':
           'Pick your favorite member one battle at a time!'}
       </p>
-      <button onclick="startMemberSorter()"
-        class="bg-primary text-white px-8 py-3 rounded-xl font-bold text-lg hover:opacity-90 transition shadow">
+      <button onclick="startMemberSorter()" class="btn-primary text-base">
         ${tr('start')} 🚀
       </button>
     </div>`;
 }
 
 function startMemberSorter(){
-  MS = createSwiss(members);
-  MS.pairs = swissPair(MS);
-  renderMemberBattle();
+  MS=createSwiss(members); MS.pairs=swissPair(MS); renderMemberBattle();
 }
 
 function renderMemberBattle(){
-  if(!swissNextPair(MS)){ renderMemberResult(); return; }
-  const [a,b] = MS.pairs[MS.pairIdx];
-
-  document.getElementById('app').innerHTML = `
+  if(!swissNextPair(MS)){renderMemberResult();return;}
+  const [a,b]=MS.pairs[MS.pairIdx];
+  document.getElementById('app').innerHTML=`
     <div class="max-w-xl mx-auto">
       ${progressBar(MS)}
-      <p class="text-center text-gray-600 font-medium mb-4">${tr('chooseMem')}</p>
+      <p class="text-center text-gray-500 font-semibold text-sm mb-4 tracking-wide uppercase">${tr('chooseMem')}</p>
       <div class="grid grid-cols-2 gap-4 mb-4">
         ${[a,b].map(m=>`
-          <div class="battle-card bg-white rounded-xl shadow overflow-hidden cursor-pointer
-                      border-2 border-transparent hover:border-primary"
-               onclick="memberVote(${m.id}, ${m.id===a.id?b.id:a.id}, false)">
-            <img src="${m.img}" class="w-full aspect-square object-cover">
+          <div class="battle-card" onclick="memberVote(${m.id},${m.id===a.id?b.id:a.id},false)">
+            <div class="aspect-square overflow-hidden">
+              <img src="${m.img}" class="w-full h-full object-cover hover:scale-105 transition duration-300">
+            </div>
             <div class="p-3 text-center">
-              <div class="font-bold text-sm leading-tight">${m.name[lang]}</div>
-              <div class="text-xs text-gray-400 mt-1">${m.wins}W · ${m.losses}L · ${m.draws}D</div>
+              <div class="font-bold text-gray-800 text-sm leading-tight">${m.name[lang]}</div>
             </div>
           </div>`).join('')}
       </div>
       <div class="text-center">
         <button onclick="memberVote(${a.id},${b.id},true)"
-          class="border-2 border-gray-300 text-gray-500 px-6 py-2 rounded-xl
-                 hover:border-primary hover:text-primary transition text-sm font-medium">
+          class="btn-secondary text-sm">
           🤝 ${tr('draw')}
         </button>
       </div>
     </div>`;
 }
 
-function memberVote(winnerId, loserId, isDraw){
-  const [a,b] = MS.pairs[MS.pairIdx];
-  swissApply(MS, isDraw?a.id:winnerId, isDraw?b.id:loserId, isDraw);
-  MS.pairIdx++;
-  renderMemberBattle();
+function memberVote(winnerId,loserId,isDraw){
+  const [a,b]=MS.pairs[MS.pairIdx];
+  swissApply(MS,isDraw?a.id:winnerId,isDraw?b.id:loserId,isDraw);
+  MS.pairIdx++; renderMemberBattle();
 }
 
 function renderMemberResult(){
-  const ranked = swissRanking(MS);
-  const rows = ranked.map((m,i)=>{
+  const ranked=swissRanking(MS);
+  const rows=ranked.map((m,i)=>{
     const r=i+1;
+    const isTop=r<=3;
     return `
-      <tr class="${rkClass(r)}">
-        <td class="px-3 py-3 text-center text-xl ${rkTxt(r)}">${medal(r)}</td>
-        <td class="px-2 py-2">
-          <img src="${m.img}" class="w-20 h-20 object-cover rounded" style="display:inline-block">
+      <tr class="rank-row ${isTop?'top':''} ${accentClass(r)}">
+        <td class="px-4 py-3 w-14">
+          <div class="flex justify-center">${rankBadge(r)}</div>
         </td>
-        <td class="px-3 py-3 text-base ${rkTxt(r)}">${m.name[lang]}</td>
+        <td class="px-2 py-2 w-20">
+          <img src="${m.img}" class="w-16 h-16 object-cover rounded-lg" style="display:inline-block">
+        </td>
+        <td class="px-3 py-3">
+          <div class="font-bold text-gray-800 text-sm">${m.name[lang]}</div>
+          ${isTop?`<div class="text-xs text-gray-400 mt-0.5">${r===1?'🥇 No. 1':r===2?'🥈 No. 2':'🥉 No. 3'}</div>`:''}
+        </td>
       </tr>`;
   }).join('');
 
   document.getElementById('app').innerHTML=`
     <div class="max-w-xl mx-auto">
-      <div class="text-center mb-4">
-        <h2 class="text-2xl font-bold text-primary">👑 ${tr('result')}</h2>
-        <p class="text-gray-400 text-sm">${tr('member')} · Swiss System</p>
+      <div class="text-center mb-5">
+        <h2 class="text-2xl font-extrabold text-gray-800">👑 ${tr('result')}</h2>
+        <p class="text-gray-400 text-sm font-medium">${tr('member')} · Swiss System</p>
       </div>
-      <div id="memberResultTable" class="bg-white rounded-xl shadow overflow-hidden mb-4">
-        <table class="w-full text-sm border-collapse">
-          <thead>
-            <tr class="bg-primary text-white text-sm">
-              <th class="px-3 py-2">${tr('rank')}</th>
-              <th class="px-2 py-2"></th>
-              <th class="px-3 py-2 text-left">${tr('name')}</th>
-            </tr>
-          </thead>
+      <div id="memberResultTable" class="card overflow-hidden mb-5">
+        <div class="bg-gradient-to-r from-primary to-primaryDark px-4 py-3">
+          <span class="text-white font-bold text-sm tracking-wide">${tr('rank')} · ${tr('name')}</span>
+        </div>
+        <table class="w-full border-collapse">
           <tbody>${rows}</tbody>
         </table>
       </div>
       <div class="flex gap-3 justify-center">
-        <button onclick="dlTable('memberResultTable','member-ranking')"
-          class="bg-primary text-white px-5 py-2 rounded-xl font-semibold hover:opacity-90 transition">
-          ⬇ ${tr('download')}
-        </button>
-        <button onclick="memberSorterPage()"
-          class="border-2 border-gray-300 text-gray-600 px-5 py-2 rounded-xl font-semibold hover:border-primary transition">
-          🔄 ${tr('reset')}
-        </button>
+        <button onclick="dlTable('memberResultTable','member-ranking')" class="btn-primary">⬇ ${tr('download')}</button>
+        <button onclick="memberSorterPage()" class="btn-secondary">🔄 ${tr('reset')}</button>
       </div>
     </div>`;
 }
@@ -399,104 +522,103 @@ let SS = null;
 function songSorterPage(){
   SS=null;
   document.getElementById('app').innerHTML=`
-    <div class="bg-white rounded-2xl shadow p-8 max-w-md mx-auto text-center">
-      <h2 class="text-2xl font-bold text-primary mb-1">🎵 ${tr('song')}</h2>
-      <p class="text-gray-400 text-sm mb-2">Swiss system · ${songs.length} ${tr('songLabel')}</p>
-      <p class="text-gray-400 text-xs mb-8">
+    <div class="card p-8 max-w-md mx-auto text-center">
+      <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 text-3xl">🎵</div>
+      <h2 class="text-xl font-extrabold text-gray-800 mb-1">${tr('song')}</h2>
+      <p class="text-gray-400 text-sm mb-1 font-medium">Swiss System · ${songs.length} ${tr('songLabel')}</p>
+      <p class="text-gray-400 text-xs mb-7">
         ${lang==='jp'?'各バトルでSpotifyプレビューを聴きながら選ぼう！':
           lang==='id'?'Dengarkan preview Spotify di setiap battle!':
           'Listen to Spotify previews during each battle!'}
       </p>
-      <button onclick="startSongSorter()"
-        class="bg-primary text-white px-8 py-3 rounded-xl font-bold text-lg hover:opacity-90 transition shadow">
-        ${tr('start')} 🎶
-      </button>
+      <button onclick="startSongSorter()" class="btn-primary text-base">${tr('start')} 🎶</button>
     </div>`;
 }
 
 function startSongSorter(){
-  SS = createSwiss(songs);
-  SS.pairs = swissPair(SS);
-  renderSongBattle();
+  SS=createSwiss(songs); SS.pairs=swissPair(SS); renderSongBattle();
 }
 
 function renderSongBattle(){
-  if(!swissNextPair(SS)){ renderSongResult(); return; }
-  const [a,b] = SS.pairs[SS.pairIdx];
-
+  if(!swissNextPair(SS)){renderSongResult();return;}
+  const [a,b]=SS.pairs[SS.pairIdx];
   document.getElementById('app').innerHTML=`
     <div class="max-w-2xl mx-auto">
       ${progressBar(SS)}
-      <p class="text-center text-gray-600 font-medium mb-4">${tr('chooseSong')}</p>
-      <div class="space-y-4 mb-4">
+      <p class="text-center text-gray-500 font-semibold text-sm mb-4 tracking-wide uppercase">${tr('chooseSong')}</p>
+      <div class="space-y-3 mb-4">
         ${[a,b].map((s,idx)=>{
-          const other = idx===0?b:a;
+          const other=idx===0?b:a;
           return `
-            <div class="bg-white rounded-xl shadow p-4 border-2 border-transparent hover:border-primary transition">
-              <div class="flex items-start justify-between mb-3 gap-3">
+            <div class="song-card">
+              <div class="flex items-center justify-between mb-3 gap-3">
                 <div class="min-w-0">
-                  <div class="font-bold text-base leading-snug">${s.title}</div>
-                  <div class="text-xs text-gray-400 mt-0.5">${s.wins}W · ${s.losses}L · ${s.draws}D</div>
+                  <div class="font-bold text-gray-800 text-sm leading-snug">${s.title}</div>
                 </div>
                 <button onclick="songVote(${s.id},${other.id},false)"
-                  class="flex-shrink-0 bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm
-                         hover:opacity-90 transition shadow-sm">
+                  class="btn-primary flex-shrink-0 text-sm py-2 px-4">
                   ✓ ${tr('pick')}
                 </button>
               </div>
-              <iframe
-                src="https://open.spotify.com/embed/track/${s.spotifyId}?utm_source=generator&theme=0"
+              <iframe src="https://open.spotify.com/embed/track/${s.spotifyId}?utm_source=generator&theme=0"
                 width="100%" height="80" frameborder="0"
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                loading="lazy" class="spotify-frame">
-              </iframe>
+                loading="lazy" class="spotify-frame"></iframe>
             </div>`;
         }).join('')}
       </div>
       <div class="text-center">
-        <button onclick="songVote(${a.id},${b.id},true)"
-          class="border-2 border-gray-300 text-gray-500 px-6 py-2 rounded-xl
-                 hover:border-primary hover:text-primary transition text-sm font-medium">
+        <button onclick="songVote(${a.id},${b.id},true)" class="btn-secondary text-sm">
           🤝 ${tr('draw')}
         </button>
       </div>
     </div>`;
 }
 
-function songVote(winnerId, loserId, isDraw){
-  const [a,b] = SS.pairs[SS.pairIdx];
-  swissApply(SS, isDraw?a.id:winnerId, isDraw?b.id:loserId, isDraw);
-  SS.pairIdx++;
-  renderSongBattle();
+function songVote(winnerId,loserId,isDraw){
+  const [a,b]=SS.pairs[SS.pairIdx];
+  swissApply(SS,isDraw?a.id:winnerId,isDraw?b.id:loserId,isDraw);
+  SS.pairIdx++; renderSongBattle();
 }
 
 function renderSongResult(){
-  const ranked = swissRanking(SS);
-  const rows = ranked.map((s,i)=>{
+  const ranked=swissRanking(SS);
+  const rows=ranked.map((s,i)=>{
     const r=i+1;
+    const isTop=r<=3;
     return `
-      <tr class="${rkClass(r)}">
-        <td class="px-3 py-3 text-center text-xl ${rkTxt(r)}">${medal(r)}</td>
-        <td class="px-3 py-3 text-base ${rkTxt(r)}">${s.title}</td>
+      <tr class="rank-row ${isTop?'top':''} ${accentClass(r)}">
+        <td class="px-4 py-3 w-14">
+          <div class="flex justify-center">${rankBadge(r)}</div>
+        </td>
+        <td class="px-3 py-3">
+          <div class="font-bold text-gray-800 text-sm">${s.title}</div>
+          ${isTop?`<div class="text-xs text-gray-400 mt-0.5">${r===1?'🥇 No. 1':r===2?'🥈 No. 2':'🥉 No. 3'}</div>`:''}
+        </td>
       </tr>`;
   }).join('');
 
   document.getElementById('app').innerHTML=`
     <div class="max-w-xl mx-auto">
-      <div class="text-center mb-4">
-        <h2 class="text-2xl font-bold text-primary">🎵 ${tr('result')}</h2>
-        <p class="text-gray-400 text-sm">${tr('song')} · Swiss System</p>
+      <div class="text-center mb-5">
+        <h2 class="text-2xl font-extrabold text-gray-800">🎵 ${tr('result')}</h2>
+        <p class="text-gray-400 text-sm font-medium">${tr('song')} · Swiss System</p>
       </div>
 
-      <!-- Top 3 Spotify embeds -->
-      <div class="bg-white rounded-xl shadow p-4 mb-4">
-        <h3 class="font-bold text-center text-gray-700 mb-3">🏆 ${tr('top3')}</h3>
+      <!-- Top 3 Spotify -->
+      <div class="card p-5 mb-5">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="text-lg">🏆</span>
+          <span class="font-bold text-gray-700 text-sm">${tr('top3')}</span>
+        </div>
         <div class="space-y-3">
           ${ranked.slice(0,3).map((s,i)=>`
             <div>
-              <div class="text-xs font-bold text-gray-500 mb-1">${medal(i+1)} ${s.title}</div>
-              <iframe
-                src="https://open.spotify.com/embed/track/${s.spotifyId}?utm_source=generator&theme=0"
+              <div class="flex items-center gap-2 mb-1.5">
+                ${rankBadge(i+1)}
+                <span class="text-xs font-bold text-gray-600">${s.title}</span>
+              </div>
+              <iframe src="https://open.spotify.com/embed/track/${s.spotifyId}?utm_source=generator&theme=0"
                 width="100%" height="80" frameborder="0"
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                 loading="lazy" class="spotify-frame"></iframe>
@@ -504,43 +626,33 @@ function renderSongResult(){
         </div>
       </div>
 
-      <!-- Full ranking table -->
-      <div id="songResultTable" class="bg-white rounded-xl shadow overflow-hidden mb-4">
-        <table class="w-full text-sm border-collapse">
-          <thead>
-            <tr class="bg-primary text-white text-sm">
-              <th class="px-3 py-2 w-16">${tr('rank')}</th>
-              <th class="px-3 py-2 text-left">${tr('songTitle')}</th>
-            </tr>
-          </thead>
+      <!-- Full table -->
+      <div id="songResultTable" class="card overflow-hidden mb-5">
+        <div class="bg-gradient-to-r from-primary to-primaryDark px-4 py-3">
+          <span class="text-white font-bold text-sm tracking-wide">${tr('rank')} · ${tr('songTitle')}</span>
+        </div>
+        <table class="w-full border-collapse">
           <tbody>${rows}</tbody>
         </table>
       </div>
 
       <div class="flex gap-3 justify-center">
-        <button onclick="dlTable('songResultTable','song-ranking')"
-          class="bg-primary text-white px-5 py-2 rounded-xl font-semibold hover:opacity-90 transition">
-          ⬇ ${tr('download')}
-        </button>
-        <button onclick="songSorterPage()"
-          class="border-2 border-gray-300 text-gray-600 px-5 py-2 rounded-xl font-semibold hover:border-primary transition">
-          🔄 ${tr('reset')}
-        </button>
+        <button onclick="dlTable('songResultTable','song-ranking')" class="btn-primary">⬇ ${tr('download')}</button>
+        <button onclick="songSorterPage()" class="btn-secondary">🔄 ${tr('reset')}</button>
       </div>
     </div>`;
 }
 
 /* =====================================================
-   DOWNLOAD TABLE AS PNG
+   DOWNLOAD
    ===================================================== */
-function dlTable(id, filename){
-  const el = document.getElementById(id);
+function dlTable(id,filename){
+  const el=document.getElementById(id);
   if(!el) return;
   html2canvas(el,{useCORS:true,backgroundColor:'#ffffff',scale:2}).then(canvas=>{
     const a=document.createElement('a');
     a.href=canvas.toDataURL('image/png');
-    a.download=filename+'.png';
-    a.click();
+    a.download=filename+'.png'; a.click();
   });
 }
 
@@ -551,20 +663,25 @@ let formation=[], senbatsuCount=7, activeSlot=null;
 
 function senbatsu(){
   document.getElementById('app').innerHTML=`
-    <div class="bg-white p-4 rounded-xl shadow">
-      <h2 class="text-xl font-bold mb-3">⭐ ${tr('senbatsu')}</h2>
-      <label class="block text-sm text-gray-600 mb-1">${tr('chooseCount')} (3–17)</label>
+    <div class="card p-5">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-xl">⭐</span>
+        <h2 class="text-lg font-extrabold text-gray-800">${tr('senbatsu')}</h2>
+      </div>
+      <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+        ${tr('chooseCount')} (3–17)
+      </label>
       <input type="number" min="3" max="17" value="${senbatsuCount}"
         onchange="senbatsuCount=parseInt(this.value);generateFormation()"
-        class="border p-2 rounded w-full mb-3">
-      <div class="flex gap-2 mb-3">
-        <button onclick="autoFill()" class="bg-primary text-white px-3 py-2 rounded">${tr('autoFill')}</button>
-        <button onclick="clearFormation()" class="bg-gray-200 text-gray-700 px-3 py-2 rounded">Clear</button>
+        class="input-base mb-4" style="max-width:120px">
+      <div class="flex gap-2 mb-4">
+        <button onclick="autoFill()" class="btn-primary text-sm py-2">${tr('autoFill')}</button>
+        <button onclick="clearFormation()" class="btn-secondary text-sm py-2">Clear</button>
       </div>
       <div id="stage" class="stage-bg space-y-1"></div>
-      <button onclick="downloadStage()" class="mt-4 bg-primary text-white px-4 py-2 rounded block mx-auto">
-        ⬇ ${tr('download')}
-      </button>
+      <div class="mt-4 text-center">
+        <button onclick="downloadStage()" class="btn-primary">⬇ ${tr('download')}</button>
+      </div>
     </div>`;
   generateFormation();
 }
@@ -574,28 +691,14 @@ function generateFormation(){
   let n=parseInt(senbatsuCount);
   if(isNaN(n)||n<3) n=3;
   if(n>17) n=17;
-
-  // Format: [baris belakang, ..., baris depan]  → piramida naik (belakang lebih banyak)
   const presets={
-    3: [[3]],
-    4: [[4]],
-    5: [[5]],
-    6: [[3],[3]],
-    7: [[4],[3]],
-    8: [[5],[3]],
-    9: [[5],[4]],
-    10:[[6],[4]],
-    11:[[4],[4],[3]],
-    12:[[5],[4],[3]],
-    13:[[5],[5],[3]],
-    14:[[6],[5],[3]],
-    15:[[6],[6],[3]],
-    16:[[7],[6],[3]],
-    17:[[7],[7],[3]],
+    3:[[3]],4:[[4]],5:[[5]],
+    6:[[3],[3]],7:[[4],[3]],8:[[5],[3]],9:[[5],[4]],10:[[6],[4]],
+    11:[[4],[4],[3]],12:[[5],[4],[3]],13:[[5],[5],[3]],
+    14:[[6],[5],[3]],15:[[6],[6],[3]],16:[[7],[6],[3]],17:[[7],[7],[3]],
   };
-  const rows = presets[n] || [[n]];
-  // rows[0] = baris paling belakang (atas di stage), rows[last] = baris paling depan (bawah)
-  formation = rows.map(r => Array(r[0]).fill(null));
+  const rows=presets[n]||[[n]];
+  formation=rows.map(r=>Array(r[0]).fill(null));
   renderStage();
 }
 
@@ -603,19 +706,15 @@ function renderStage(){
   const stage=document.getElementById('stage');
   if(!stage) return;
   stage.innerHTML='';
-  const isFrontRow=(ri)=> ri===formation.length-1;
+  const isFrontRow=ri=>ri===formation.length-1;
   formation.forEach((row,ri)=>{
     const div=document.createElement('div');
-    div.className=`flex justify-center gap-1`;
+    div.className='flex justify-center gap-1';
     row.forEach((slot,ci)=>{
       const box=document.createElement('div');
       const isFront=isFrontRow(ri);
       const len=row.length;
-      const isCenter=isFront&&(
-        len%2===1
-          ? ci===Math.floor(len/2)
-          : ci===len/2-1||ci===len/2
-      );
+      const isCenter=isFront&&(len%2===1?ci===Math.floor(len/2):ci===len/2-1||ci===len/2);
       box.className=`w-20 h-20 bg-white/10 rounded-lg flex items-center justify-center
                      cursor-pointer text-white hover:bg-white/20 transition flex-shrink-0
                      ${isCenter&&slot?'center-glow':''}`;
@@ -624,11 +723,12 @@ function renderStage(){
         box.innerHTML=`
           <div class="relative w-full h-full">
             <img src="${slot.img}" class="w-full h-full object-cover rounded-lg">
-            <div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs
-                        text-center py-0.5 rounded-b-lg truncate px-1">${slot.name[lang]}</div>
+            <div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white
+                        text-center py-0.5 rounded-b-lg truncate px-1"
+                 style="font-size:10px">${slot.name[lang]}</div>
           </div>`;
       } else {
-        box.innerHTML=`<span class="text-2xl opacity-40">+</span>`;
+        box.innerHTML=`<span class="text-2xl opacity-30">+</span>`;
       }
       div.appendChild(box);
     });
@@ -636,7 +736,7 @@ function renderStage(){
   });
 }
 
-function selectMember(r,c){ activeSlot={row:r,col:c}; openModal(); }
+function selectMember(r,c){activeSlot={row:r,col:c};openModal();}
 
 function openModal(){
   const mm=document.getElementById('memberModal');
@@ -648,8 +748,9 @@ function openModal(){
     const div=document.createElement('div');
     div.className=`text-center cursor-pointer ${used?'opacity-40 pointer-events-none':'hover:scale-105 transition'}`;
     div.innerHTML=`
-      <img src="${m.img}" class="w-full aspect-square object-cover rounded-lg border-2 ${used?'border-gray-300':'border-primary'}">
-      <div class="text-xs mt-1">${m.name[lang]}</div>`;
+      <img src="${m.img}" class="w-full aspect-square object-cover rounded-lg border-2
+           ${used?'border-gray-200':'border-primary/50'}">
+      <div class="text-xs mt-1 font-medium text-gray-700 truncate">${m.name[lang]}</div>`;
     if(!used) div.onclick=()=>selectFromModal(m.id);
     mg.appendChild(div);
   });
@@ -667,7 +768,7 @@ function selectFromModal(id){
   closeModal(); renderStage();
 }
 
-function clearFormation(){ formation=formation.map(r=>r.map(()=>null)); renderStage(); }
+function clearFormation(){formation=formation.map(r=>r.map(()=>null));renderStage();}
 
 function autoFill(){
   const shuffled=[...members].sort(()=>Math.random()-0.5);
@@ -679,7 +780,7 @@ function autoFill(){
 function downloadStage(){
   const stage=document.getElementById('stage');
   if(!stage) return;
-  html2canvas(stage,{useCORS:true,backgroundColor:'#0f2027'}).then(canvas=>{
+  html2canvas(stage,{useCORS:true,backgroundColor:'#0b1a23'}).then(canvas=>{
     const a=document.createElement('a');
     a.href=canvas.toDataURL('image/png');
     a.download='dream-senbatsu.png'; a.click();
