@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rain Tree Fans Tools</title>
+<title>Rain Tree Space</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -25,6 +25,7 @@
   .header-bg::before{
     content:'';position:absolute;inset:0;
     background:radial-gradient(ellipse at top right,rgba(255,255,255,0.15),transparent 60%);
+    pointer-events:none;
   }
 
   /* ── Nav ── */
@@ -113,11 +114,11 @@
   .accent-2{border-left:4px solid #9E9E9E;}
   .accent-3{border-left:4px solid #8B5E3C;}
 
-  /* ── Senbatsu stage ── */
-  .stage-bg{
-    background:radial-gradient(ellipse at center bottom,rgba(46,196,198,0.5),transparent 65%),
-    linear-gradient(to top,#0b1a23,#1a3040,#243d50);
-    padding:32px 16px 28px;border-radius:20px;
+  /* ── Senbatsu stage (simplified) ── */
+  .stage-simple{
+    background:#fff;
+    padding:24px 16px;
+    border-radius:16px;
   }
   .center-glow{
     box-shadow:0 0 18px rgba(255,215,0,0.85),0 0 36px rgba(255,215,0,0.4);
@@ -146,7 +147,34 @@
   }
   .input-base:focus{border-color:#2ec4c6;box-shadow:0 0 0 3px rgba(46,196,198,0.12);}
 
-  /* ── Modal ── */
+  /* ── Love Fortune card ── */
+  .love-card{
+    background:linear-gradient(135deg,#fff5fb 0%,#fff0f8 40%,#f0fafa 100%);
+    border-radius:20px;overflow:hidden;
+    box-shadow:0 4px 24px rgba(236,72,153,0.12),0 1px 4px rgba(0,0,0,0.06);
+    border:1.5px solid rgba(236,72,153,0.15);
+    position:relative;
+  }
+  .love-card::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(ellipse at top right,rgba(236,72,153,0.08),transparent 60%);
+    pointer-events:none;
+  }
+  .pct-ring-bg{stroke:#fce7f3;stroke-width:8;fill:none;}
+  .pct-ring{stroke-width:8;fill:none;stroke-linecap:round;
+            stroke:url(#loveGrad);transition:stroke-dashoffset 1.2s ease;}
+  .quiz-opt{
+    background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;
+    padding:12px 16px;cursor:pointer;transition:all .18s;
+    text-align:left;font-weight:600;font-size:0.875rem;color:#374151;
+    width:100%;
+  }
+  .quiz-opt:hover{border-color:#f9a8d4;background:#fff5fb;color:#be185d;}
+  .quiz-opt.selected{border-color:#ec4899;background:#fdf2f8;color:#be185d;}
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .fade-in{animation:fadeInUp .4s ease both;}
+  @keyframes heartPop{0%{transform:scale(0);}60%{transform:scale(1.2);}100%{transform:scale(1);}}
+  .heart-pop{animation:heartPop .5s ease both;}
   .modal-inner{
     background:#fff;border-radius:20px;padding:20px;
     max-width:640px;width:100%;max-height:82vh;overflow-y:auto;position:relative;
@@ -160,7 +188,7 @@
 <header class="header-bg text-white px-5 py-4 flex justify-between items-center relative z-10">
   <div class="flex items-center gap-2.5">
     <span class="text-2xl">🌧️</span>
-    <span class="font-extrabold text-lg tracking-tight">Rain Tree Fans Tools</span>
+    <span class="font-extrabold text-lg tracking-tight">Rain Tree Space</span>
   </div>
   <select id="langSelect" onchange="changeLang(this.value)"
     class="text-gray-700 rounded-lg px-3 py-1.5 text-sm font-semibold bg-white/90 border-0 outline-none cursor-pointer">
@@ -198,6 +226,7 @@ let lang = 'jp';
 const T = {
   home:       {id:'Home',          en:'Home',          jp:'ホーム'},
   member:     {id:'Member Sorter', en:'Member Sorter',  jp:'メンバーソート'},
+  love:       {id:'Love Fortune',  en:'Love Fortune',   jp:'恋愛占い'},
   song:       {id:'Song Sorter',   en:'Song Sorter',    jp:'楽曲ソート'},
   senbatsu:   {id:'Dream Senbatsu',en:'Dream Senbatsu', jp:'夢の選抜'},
   download:   {id:'Download',      en:'Download',       jp:'保存'},
@@ -264,17 +293,22 @@ const songs = [
 let currentPage = 'home';
 
 function renderNav(){
-  const pages = ['home','member','song','senbatsu'];
+  const pages = ['home','member','song','senbatsu','love'];
   document.getElementById('nav').innerHTML = pages.map(p =>
     `<button class="nav-btn ${currentPage===p?'active':''}" onclick="go('${p}')">${tr(p)}</button>`
   ).join('');
 }
 
-function changeLang(l){ lang=l; renderNav(); }
+function changeLang(l){
+  lang=l;
+  renderNav();
+  // Re-render halaman yang sedang aktif
+  ({home, member:memberSorterPage, song:songSorterPage, senbatsu, love:loveFortune})[currentPage]?.();
+}
 
 function go(p){
   currentPage=p; renderNav();
-  ({home, member:memberSorterPage, song:songSorterPage, senbatsu})[p]?.();
+  ({home, member:memberSorterPage, song:songSorterPage, senbatsu, love:loveFortune})[p]?.();
 }
 
 /* =====================================================
@@ -287,14 +321,15 @@ function home(){
                   bg-white shadow-lg mb-4" style="box-shadow:0 4px 20px rgba(46,196,198,0.2)">
         <span class="text-3xl">🌧️</span>
       </div>
-      <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight mb-1">Rain Tree Fan Tools</h1>
+      <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight mb-1">Rain Tree Space</h1>
       <p class="text-gray-400 text-sm font-medium">ファンのためのファンツール</p>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
       ${[
         {p:'member',  icon:'👑', label:tr('member'),  sub:{id:'Battle & ranking member',en:'Battle & ranking member',jp:'メンバーをバトルでランキング'}},
         {p:'song',    icon:'🎵', label:tr('song'),    sub:{id:'Battle lagu favoritmu', en:'Battle your favorite songs',jp:'曲をバトルでランキング'}},
         {p:'senbatsu',icon:'⭐', label:tr('senbatsu'),sub:{id:'Susun formasi impianmu', en:'Build your dream formation',jp:'夢のフォーメーションを組もう'}},
+        {p:'love',    icon:'💌', label:tr('love'),    sub:{id:'Siapa member jodohmu?',  en:'Who is your destined member?',jp:'運命のメンバーは誰？'}},
       ].map(item=>`
         <button onclick="go('${item.p}')"
           class="card card-hover p-6 text-center group cursor-pointer
@@ -424,7 +459,7 @@ function memberSorterPage(){
     <div class="card p-8 max-w-md mx-auto text-center">
       <div class="w-14 h-14 rounded-2xl bg-yellow-50 flex items-center justify-center mx-auto mb-4 text-3xl">👑</div>
       <h2 class="text-xl font-extrabold text-gray-800 mb-1">${tr('member')}</h2>
-      <p class="text-gray-400 text-sm mb-1 font-medium">Swiss System · ${members.length} members</p>
+      <p class="text-gray-400 text-sm mb-1 font-medium">${members.length} members</p>
       <p class="text-gray-400 text-xs mb-7">
         ${lang==='jp'?'好きなメンバーを1対1で選んでいこう！':
           lang==='id'?'Pilih member favoritmu satu per satu!':
@@ -475,11 +510,17 @@ function memberVote(winnerId,loserId,isDraw){
 
 function renderMemberResult(){
   const ranked=swissRanking(MS);
-  const rows=ranked.map((m,i)=>{
-    const r=i+1;
-    const isTop=r<=3;
+  
+  // Top 3
+  const top1 = ranked[0];
+  const top2 = ranked[1];
+  const top3 = ranked[2];
+  
+  // Rest in table (rank 4+)
+  const tableRows = ranked.slice(3).map((m,i)=>{
+    const r = i + 4;
     return `
-      <tr class="rank-row ${isTop?'top':''} ${accentClass(r)}">
+      <tr class="rank-row">
         <td class="px-4 py-3 w-14">
           <div class="flex justify-center">${rankBadge(r)}</div>
         </td>
@@ -488,30 +529,108 @@ function renderMemberResult(){
         </td>
         <td class="px-3 py-3">
           <div class="font-bold text-gray-800 text-sm">${m.name[lang]}</div>
-          ${isTop?`<div class="text-xs text-gray-400 mt-0.5">${r===1?'🥇 No. 1':r===2?'🥈 No. 2':'🥉 No. 3'}</div>`:''}
         </td>
       </tr>`;
   }).join('');
 
   document.getElementById('app').innerHTML=`
     <div class="max-w-xl mx-auto">
-      <div class="text-center mb-5">
+      <!-- Header -->
+      <div class="text-center mb-4">
         <h2 class="text-2xl font-extrabold text-gray-800">👑 ${tr('result')}</h2>
-        <p class="text-gray-400 text-sm font-medium">${tr('member')} · Swiss System</p>
+        <p class="text-gray-400 text-sm font-medium">${tr('member')}</p>
       </div>
-      <div id="memberResultTable" class="card overflow-hidden mb-5">
-        <div class="bg-gradient-to-r from-primary to-primaryDark px-4 py-3">
-          <span class="text-white font-bold text-sm tracking-wide">${tr('rank')} · ${tr('name')}</span>
+
+      <!-- Podium Container -->
+      <div id="memberPodium" class="mb-5 space-y-3">
+        <!-- Rank 1 - Full width -->
+        <div class="card overflow-hidden relative group">
+          <div class="relative">
+            <img src="${top1.img}" class="w-full object-cover" style="max-height:70vh;">
+            <!-- Overlay bottom gradient for text readability -->
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="flex items-center gap-2 mb-1">
+                    ${rankBadge(1)}
+                    <span class="text-white font-extrabold text-lg">${top1.name[lang]}</span>
+                  </div>
+                  <div class="text-white/80 text-xs font-medium">🥇 No. 1 Champion</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <table class="w-full border-collapse">
-          <tbody>${rows}</tbody>
-        </table>
+
+        <!-- Rank 2 & 3 - Side by side -->
+        <div class="grid grid-cols-2 gap-3">
+          <!-- Rank 2 -->
+          <div class="card overflow-hidden relative">
+            <div class="relative">
+              <img src="${top2.img}" class="w-full aspect-square object-cover">
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3">
+                <div class="flex flex-col">
+                  <div class="flex items-center gap-1.5 mb-0.5">
+                    ${rankBadge(2)}
+                    <span class="text-white font-bold text-sm">${top2.name[lang]}</span>
+                  </div>
+                  <div class="text-white/70 text-xs font-medium">🥈 Runner-up</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rank 3 -->
+          <div class="card overflow-hidden relative">
+            <div class="relative">
+              <img src="${top3.img}" class="w-full aspect-square object-cover">
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3">
+                <div class="flex flex-col">
+                  <div class="flex items-center gap-1.5 mb-0.5">
+                    ${rankBadge(3)}
+                    <span class="text-white font-bold text-sm">${top3.name[lang]}</span>
+                  </div>
+                  <div class="text-white/70 text-xs font-medium">🥉 Third Place</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <!-- Rest of rankings in table -->
+      ${ranked.length > 3 ? `
+        <div id="memberResultTable" class="card overflow-hidden mb-5">
+          <div class="bg-gradient-to-r from-primary to-primaryDark px-4 py-3">
+            <span class="text-white font-bold text-sm tracking-wide">${tr('rank')} · ${tr('name')}</span>
+          </div>
+          <table class="w-full border-collapse">
+            <tbody>${tableRows}</tbody>
+          </table>
+        </div>
+      ` : ''}
+
+      <!-- Buttons -->
       <div class="flex gap-3 justify-center">
-        <button onclick="dlTable('memberResultTable','member-ranking')" class="btn-primary">⬇ ${tr('download')}</button>
+        <button onclick="shareToX('member',{winner:'${top1.name[lang]}'})" 
+          class="btn-primary" style="background:linear-gradient(135deg,#1DA1F2,#0c85d0);">
+          🐦 Share
+        </button>
+        <button onclick="downloadMemberPodium()" class="btn-primary">⬇ ${tr('download')}</button>
         <button onclick="memberSorterPage()" class="btn-secondary">🔄 ${tr('reset')}</button>
       </div>
     </div>`;
+}
+
+// New download function for podium layout
+function downloadMemberPodium(){
+  const el=document.getElementById('memberPodium');
+  if(!el) return;
+  html2canvas(el,{useCORS:true,backgroundColor:'#f0fafa',scale:2}).then(canvas=>{
+    const a=document.createElement('a');
+    a.href=canvas.toDataURL('image/png');
+    a.download='member-ranking.png'; a.click();
+  });
 }
 
 /* =====================================================
@@ -525,7 +644,7 @@ function songSorterPage(){
     <div class="card p-8 max-w-md mx-auto text-center">
       <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 text-3xl">🎵</div>
       <h2 class="text-xl font-extrabold text-gray-800 mb-1">${tr('song')}</h2>
-      <p class="text-gray-400 text-sm mb-1 font-medium">Swiss System · ${songs.length} ${tr('songLabel')}</p>
+      <p class="text-gray-400 text-sm mb-1 font-medium">${songs.length} ${tr('songLabel')}</p>
       <p class="text-gray-400 text-xs mb-7">
         ${lang==='jp'?'各バトルでSpotifyプレビューを聴きながら選ぼう！':
           lang==='id'?'Dengarkan preview Spotify di setiap battle!':
@@ -602,7 +721,7 @@ function renderSongResult(){
     <div class="max-w-xl mx-auto">
       <div class="text-center mb-5">
         <h2 class="text-2xl font-extrabold text-gray-800">🎵 ${tr('result')}</h2>
-        <p class="text-gray-400 text-sm font-medium">${tr('song')} · Swiss System</p>
+        <p class="text-gray-400 text-sm font-medium">${tr('song')}</p>
       </div>
 
       <!-- Top 3 Spotify -->
@@ -637,6 +756,10 @@ function renderSongResult(){
       </div>
 
       <div class="flex gap-3 justify-center">
+        <button onclick="shareToX('song',{winner:'${ranked[0].title}'})" 
+          class="btn-primary" style="background:linear-gradient(135deg,#1DA1F2,#0c85d0);">
+          🐦 Share
+        </button>
         <button onclick="dlTable('songResultTable','song-ranking')" class="btn-primary">⬇ ${tr('download')}</button>
         <button onclick="songSorterPage()" class="btn-secondary">🔄 ${tr('reset')}</button>
       </div>
@@ -678,7 +801,7 @@ function senbatsu(){
         <button onclick="autoFill()" class="btn-primary text-sm py-2">${tr('autoFill')}</button>
         <button onclick="clearFormation()" class="btn-secondary text-sm py-2">Clear</button>
       </div>
-      <div id="stage" class="stage-bg space-y-1"></div>
+      <div id="stage" class="stage-simple space-y-0.5"></div>
       <div class="mt-4 text-center">
         <button onclick="downloadStage()" class="btn-primary">⬇ ${tr('download')}</button>
       </div>
@@ -709,26 +832,27 @@ function renderStage(){
   const isFrontRow=ri=>ri===formation.length-1;
   formation.forEach((row,ri)=>{
     const div=document.createElement('div');
-    div.className='flex justify-center gap-1';
+    div.className='flex justify-center gap-0.5';
     row.forEach((slot,ci)=>{
       const box=document.createElement('div');
       const isFront=isFrontRow(ri);
       const len=row.length;
       const isCenter=isFront&&(len%2===1?ci===Math.floor(len/2):ci===len/2-1||ci===len/2);
-      box.className=`w-20 h-20 bg-white/10 rounded-lg flex items-center justify-center
-                     cursor-pointer text-white hover:bg-white/20 transition flex-shrink-0
-                     ${isCenter&&slot?'center-glow':''}`;
+      // Simple white box with border, highlight center with thicker border
+      box.className=`w-20 h-20 bg-white rounded flex items-center justify-center
+                     cursor-pointer hover:bg-gray-50 transition flex-shrink-0
+                     ${isCenter&&slot?'border-2 border-primary':'border border-gray-200'}`;
       box.onclick=()=>selectMember(ri,ci);
       if(slot){
         box.innerHTML=`
           <div class="relative w-full h-full">
-            <img src="${slot.img}" class="w-full h-full object-cover rounded-lg">
-            <div class="absolute bottom-0 left-0 right-0 bg-black/50 text-white
-                        text-center py-0.5 rounded-b-lg truncate px-1"
-                 style="font-size:10px">${slot.name[lang]}</div>
+            <img src="${slot.img}" class="w-full h-full object-cover rounded-sm">
+            <div class="absolute bottom-0 left-0 right-0 bg-black/60 text-white
+                        text-center py-0.5 truncate px-1"
+                 style="font-size:9px">${slot.name[lang]}</div>
           </div>`;
       } else {
-        box.innerHTML=`<span class="text-2xl opacity-30">+</span>`;
+        box.innerHTML=`<span class="text-xl text-gray-300">+</span>`;
       }
       div.appendChild(box);
     });
@@ -780,10 +904,485 @@ function autoFill(){
 function downloadStage(){
   const stage=document.getElementById('stage');
   if(!stage) return;
-  html2canvas(stage,{useCORS:true,backgroundColor:'#0b1a23'}).then(canvas=>{
+  html2canvas(stage,{useCORS:true,backgroundColor:'#ffffff'}).then(canvas=>{
     const a=document.createElement('a');
     a.href=canvas.toDataURL('image/png');
     a.download='dream-senbatsu.png'; a.click();
+  });
+}
+
+/* =====================================================
+   SHARE TO X (TWITTER)
+   ===================================================== */
+function shareToX(type, data){
+  let text = '';
+  const url = window.location.href;
+  
+  if(type === 'member'){
+    const templates = {
+      jp: `Rain Tree Spaceでメンバーソートをやってみた！1位は${data.winner}でした！🎉 #RainTree`,
+      id: `Aku baru selesai Member Sorter di Rain Tree Space! Juara 1-ku adalah ${data.winner}! 🎉 #RainTree`,
+      en: `Just finished Member Sorter on Rain Tree Space! My #1 is ${data.winner}! 🎉 #RainTree`
+    };
+    text = templates[lang];
+  }
+  
+  if(type === 'song'){
+    const templates = {
+      jp: `楽曲ソートで1位になったのは「${data.winner}」！🎵 #RainTree`,
+      id: `Lagu favoritku di Song Sorter adalah "${data.winner}"! 🎵 #RainTree`,
+      en: `My #1 song from the Song Sorter is "${data.winner}"! 🎵 #RainTree`
+    };
+    text = templates[lang];
+  }
+  
+  if(type === 'love'){
+    const templates = {
+      jp: `運命のメンバーは${data.member}！相性${data.pct}%でした💕 #RainTree`,
+      id: `Member jodohku adalah ${data.member}! Kecocokan ${data.pct}%! 💕 #RainTree`,
+      en: `My destined member is ${data.member}! Compatibility: ${data.pct}%! 💕 #RainTree`
+    };
+    text = templates[lang];
+  }
+  
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+  window.open(twitterUrl, '_blank', 'width=550,height=420');
+}
+
+/* =====================================================
+   LOVE FORTUNE
+   ===================================================== */
+
+// MBTI member data
+const memberMBTI = {
+  1:'INTJ',2:'ISTP',3:'INTP',4:'ESFP',5:'ENFJ',6:'INFJ',
+  7:'INFP',8:'ESFJ',9:'INFP',10:'ENFP',11:'ESFJ',12:'ENFJ',
+  13:'INFP',14:'ISFP',15:'ENFP',16:'ISFP',17:'INFP'
+};
+
+// Kompatibilitas MBTI — skor 0-100
+// Berdasarkan teori: pasangan komplementer & kognitif stack
+const mbtiCompat = {
+  INTJ:{ENFP:95,ENTP:90,INFJ:82,ENTJ:78,INFP:72,INTP:68,ENFJ:65,ISFP:60,ISTP:55,ESFP:50,ISFJ:45,ISTJ:42,ESFJ:38,ESTJ:35,ESTP:30,ENFJ:65},
+  INTP:{ENFJ:95,ENTJ:88,ENTP:80,INFJ:75,INTJ:68,ENFP:65,INFP:62,ISTP:58,ESFJ:50,ISFJ:45,ISFP:42,ESTP:40,ESFP:38,ESTJ:35,ISTJ:32,ESFJ:50},
+  INFJ:{ENFP:95,ENTP:88,INTJ:82,INFP:78,ENFJ:72,ENTJ:68,INFJ:60,ISFJ:55,ISFP:50,ESFJ:48,ISTP:42,INTP:75,ESTP:35,ESFP:38,ESTJ:30,ISTJ:28},
+  INFP:{ENFJ:95,ENTJ:85,ENTP:80,INFJ:78,ENFP:72,INTJ:72,INFP:60,ISFP:65,ESFJ:50,ISFJ:48,ISTP:42,INTP:62,ESTP:32,ESFP:40,ESTJ:28,ISTJ:25},
+  ENFJ:{INFP:95,ISFP:90,INTP:88,INTJ:65,INFJ:72,ENFJ:60,ENFP:68,ENTJ:62,ESFJ:55,ISFJ:52,ISTP:45,ESTP:38,ESFP:42,ESTJ:40,ISTJ:35,ENTP:70},
+  ENFP:{INTJ:95,INFJ:90,INTP:80,INFP:72,ENFJ:68,ENTJ:65,ENFP:58,ISFP:55,ESFJ:50,ISFJ:45,ISTP:40,ESTP:38,ESFP:42,ESTJ:32,ISTJ:28,ENTP:75},
+  ISFP:{ENFJ:90,ESFJ:82,ENTJ:78,ENFP:55,INFJ:50,ISFP:60,ISTP:55,INFP:65,ISFJ:52,ESFP:58,INTP:42,INTJ:60,ESTP:45,ENTP:40,ESTJ:35,ISTJ:30},
+  ISTP:{ESFJ:88,ESTJ:80,ENTJ:75,ESTP:65,ISTP:55,ISFP:55,ESFP:60,ISFJ:50,ENFJ:45,ENFP:40,INFJ:42,INFP:42,INTP:58,INTJ:55,ENTP:45,ISTJ:48},
+  ESFJ:{ISTP:88,ISFP:82,ISTJ:78,ESTP:68,ESFJ:55,ISFJ:60,INFP:50,INFJ:48,ENFP:50,ESFP:58,ENFJ:55,ENTJ:45,INTP:50,INTJ:38,ENTP:40,ESTJ:65},
+  ESFP:{ISTJ:88,ISFJ:82,ISTP:60,ESFP:55,ESFJ:58,ENFP:42,INFP:40,ISFP:58,ENFJ:42,ENTJ:40,INFJ:38,INTP:38,INTJ:50,ENTP:40,ESTJ:70,ESTP:62},
+  ISFJ:{ESFP:82,ESTP:78,ENFP:45,ISFP:52,ESFJ:60,INFP:48,INFJ:55,ISFJ:55,ENFJ:52,ENTJ:42,ISTP:50,INTP:45,INTJ:45,ENTP:38,ESTJ:72,ISTJ:68},
+  ISTJ:{ESFP:88,ESTP:80,ESTJ:70,ISFJ:68,ISTP:48,ESFJ:65,ISFP:30,ENFP:28,INFP:25,INFJ:28,ENFJ:35,ENTJ:55,INTP:32,INTJ:42,ENTP:30,ISTJ:58},
+};
+
+function getMBTICompat(typeA, typeB){
+  if(!typeA||!typeB) return 50;
+  const row = mbtiCompat[typeA];
+  if(!row) return 50;
+  return row[typeB] ?? 50;
+}
+
+// Quiz questions — 8 pertanyaan, setiap jawaban memberi skor ke 4 dimensi MBTI
+// Dimensi: E/I, N/S, F/T, J/P  (setiap jawaban: [E,N,F,J] vs [I,S,T,P])
+const quizData = {
+  questions: [
+    {
+      jp:'週末の理想的な過ごし方は？',
+      id:'Cara idealmu menghabiskan akhir pekan?',
+      en:'Your ideal way to spend the weekend?',
+      opts:[
+        {jp:'友達と外出してリフレッシュ', id:'Keluar bersama teman-teman', en:'Go out with friends to recharge',
+         dim:{E:2,I:0,N:0,S:1,F:1,T:0,J:0,P:1}},
+        {jp:'家でゆっくり一人の時間を楽しむ', id:'Istirahat tenang di rumah sendirian', en:'Enjoy quiet alone time at home',
+         dim:{E:0,I:2,N:1,S:0,F:0,T:1,J:1,P:0}},
+        {jp:'新しい場所や体験を探しに行く', id:'Menjelajahi tempat atau pengalaman baru', en:'Explore new places or experiences',
+         dim:{E:1,I:0,N:2,S:0,F:0,T:1,J:0,P:2}},
+        {jp:'計画通りに趣味に時間を使う', id:'Melakukan hobi sesuai rencana', en:'Spend time on hobbies as planned',
+         dim:{E:0,I:1,N:0,S:1,F:1,T:0,J:2,P:0}},
+      ]
+    },
+    {
+      jp:'友達が悩んでいたらどうする？',
+      id:'Apa yang kamu lakukan jika teman sedang galau?',
+      en:'What do you do when a friend is troubled?',
+      opts:[
+        {jp:'とにかく話を聞いて共感する', id:'Mendengarkan dan berempati sepenuhnya', en:'Listen and fully empathize',
+         dim:{E:1,I:0,N:0,S:1,F:2,T:0,J:0,P:1}},
+        {jp:'具体的な解決策を一緒に考える', id:'Mencari solusi konkret bersama', en:'Think of concrete solutions together',
+         dim:{E:1,I:0,N:0,S:1,F:0,T:2,J:1,P:0}},
+        {jp:'励ましの言葉で気持ちを上げる', id:'Memberikan kata-kata semangat', en:'Cheer them up with encouraging words',
+         dim:{E:2,I:0,N:1,S:0,F:1,T:0,J:0,P:1}},
+        {jp:'そっとしておく（一人の時間も大切）', id:'Memberikan ruang (waktu sendiri itu penting)', en:'Give space — alone time is important',
+         dim:{E:0,I:2,N:1,S:0,F:1,T:1,J:0,P:1}},
+      ]
+    },
+    {
+      jp:'決断するとき、あなたはどちら？',
+      id:'Ketika mengambil keputusan, kamu cenderung...',
+      en:'When making decisions, you tend to...',
+      opts:[
+        {jp:'論理と事実を優先する', id:'Mengutamakan logika dan fakta', en:'Prioritize logic and facts',
+         dim:{E:0,I:1,N:0,S:1,F:0,T:2,J:1,P:0}},
+        {jp:'自分と周りの気持ちを優先する', id:'Mengutamakan perasaan diri dan orang lain', en:'Prioritize feelings of self and others',
+         dim:{E:1,I:0,N:1,S:0,F:2,T:0,J:0,P:1}},
+        {jp:'直感でパッと決める', id:'Memutuskan cepat berdasarkan intuisi', en:'Decide quickly based on intuition',
+         dim:{E:1,I:0,N:2,S:0,F:1,T:0,J:0,P:2}},
+        {jp:'時間をかけてじっくり考える', id:'Mempertimbangkan matang-matang', en:'Take time to consider carefully',
+         dim:{E:0,I:2,N:0,S:1,F:0,T:1,J:2,P:0}},
+      ]
+    },
+    {
+      jp:'あなたにとって「楽しい会話」とは？',
+      id:'Bagi kamu, percakapan yang menyenangkan itu...',
+      en:'For you, an enjoyable conversation is...',
+      opts:[
+        {jp:'将来の夢や可能性について語り合う', id:'Membicarakan mimpi dan kemungkinan masa depan', en:'Talking about dreams and future possibilities',
+         dim:{E:1,I:0,N:2,S:0,F:1,T:0,J:0,P:1}},
+        {jp:'具体的な出来事や趣味の話', id:'Membahas kejadian nyata atau hobi konkret', en:'Discussing real events or specific hobbies',
+         dim:{E:1,I:0,N:0,S:2,F:1,T:0,J:0,P:1}},
+        {jp:'深くて意味のある話', id:'Percakapan yang dalam dan bermakna', en:'Deep and meaningful discussions',
+         dim:{E:0,I:1,N:2,S:0,F:1,T:1,J:1,P:0}},
+        {jp:'笑えて楽しい軽い話', id:'Obrolan ringan yang bikin tertawa', en:'Light-hearted fun chat',
+         dim:{E:2,I:0,N:0,S:1,F:1,T:0,J:0,P:2}},
+      ]
+    },
+    {
+      jp:'グループ活動でのあなたは？',
+      id:'Dalam kegiatan kelompok, kamu biasanya...',
+      en:'In group activities, you usually...',
+      opts:[
+        {jp:'自然とリーダー役になることが多い', id:'Sering jadi pemimpin secara alami', en:'Naturally become the leader',
+         dim:{E:2,I:0,N:1,S:0,F:0,T:1,J:2,P:0}},
+        {jp:'アイデアを出して場を盛り上げる', id:'Menyumbang ide dan menghidupkan suasana', en:'Contribute ideas and energize the group',
+         dim:{E:2,I:0,N:2,S:0,F:1,T:0,J:0,P:1}},
+        {jp:'縁の下の力持ち（サポート役）', id:'Jadi pendukung di balik layar', en:'Be the quiet supporter behind the scenes',
+         dim:{E:0,I:2,N:0,S:1,F:1,T:0,J:1,P:0}},
+        {jp:'自分の役割をこなして貢献する', id:'Menyelesaikan peran sendiri dan berkontribusi', en:'Fulfill my own role and contribute',
+         dim:{E:0,I:1,N:0,S:1,F:0,T:1,J:2,P:0}},
+      ]
+    },
+    {
+      jp:'恋愛でいちばん大切にしていることは？',
+      id:'Dalam hubungan, hal yang paling kamu utamakan adalah...',
+      en:'In a relationship, what matters most to you?',
+      opts:[
+        {jp:'深い感情的なつながり', id:'Koneksi emosional yang dalam', en:'A deep emotional connection',
+         dim:{E:0,I:1,N:1,S:0,F:2,T:0,J:1,P:0}},
+        {jp:'お互いを高め合える関係', id:'Saling mendukung pertumbuhan satu sama lain', en:'Growing together and inspiring each other',
+         dim:{E:1,I:0,N:2,S:0,F:1,T:1,J:1,P:0}},
+        {jp:'一緒にいて楽しい・笑える', id:'Menyenangkan dan bisa tertawa bersama', en:'Fun and lots of laughter together',
+         dim:{E:2,I:0,N:0,S:1,F:1,T:0,J:0,P:2}},
+        {jp:'信頼と安定感', id:'Kepercayaan dan stabilitas', en:'Trust and stability',
+         dim:{E:0,I:1,N:0,S:1,F:0,T:1,J:2,P:0}},
+      ]
+    },
+    {
+      jp:'自分のことをどう表現する？',
+      id:'Bagaimana kamu menggambarkan dirimu sendiri?',
+      en:'How would you describe yourself?',
+      opts:[
+        {jp:'想像力豊かで夢見がち', id:'Imajinatif dan suka bermimpi', en:'Imaginative and a dreamer',
+         dim:{E:0,I:1,N:2,S:0,F:1,T:0,J:0,P:1}},
+        {jp:'現実的で地に足のついた', id:'Realistis dan membumi', en:'Realistic and grounded',
+         dim:{E:0,I:1,N:0,S:2,F:0,T:1,J:1,P:0}},
+        {jp:'社交的で人が好き', id:'Sosial dan suka bertemu orang', en:'Social and love meeting people',
+         dim:{E:2,I:0,N:0,S:1,F:1,T:0,J:0,P:1}},
+        {jp:'感情豊かで共感力が高い', id:'Penuh perasaan dan berempati tinggi', en:'Emotionally rich and highly empathetic',
+         dim:{E:0,I:1,N:1,S:0,F:2,T:0,J:0,P:1}},
+      ]
+    },
+    {
+      jp:'スケジュールについて、あなたは？',
+      id:'Soal jadwal, kamu adalah tipe yang...',
+      en:'When it comes to schedules, you are...',
+      opts:[
+        {jp:'あらかじめしっかり計画を立てる', id:'Membuat rencana detail terlebih dahulu', en:'Plan everything in advance',
+         dim:{E:0,I:1,N:0,S:1,F:0,T:1,J:2,P:0}},
+        {jp:'大まかに決めてあとは流れで', id:'Rencanakan garis besar, ikuti arus sisanya', en:'Plan loosely and go with the flow',
+         dim:{E:1,I:0,N:1,S:0,F:1,T:0,J:0,P:2}},
+        {jp:'直前まで決めないほうが自由でいい', id:'Lebih suka tidak memutuskan sampai menit terakhir', en:'Prefer deciding at the last minute',
+         dim:{E:1,I:0,N:1,S:0,F:0,T:1,J:0,P:2}},
+        {jp:'細かくリストを作って管理する', id:'Membuat daftar rinci dan mengelolanya', en:'Make detailed lists and manage them',
+         dim:{E:0,I:1,N:0,S:1,F:0,T:1,J:2,P:0}},
+      ]
+    },
+  ]
+};
+
+// Narasi kecocokan berdasarkan skor
+const compatNarrative = {
+  jp:{
+    hi: [
+      'あなたたちは魂で繋がっています。価値観も感性もびっくりするほど似ていて、一緒にいると自然と笑顔になれる運命の相手。',
+      '出会った瞬間から特別な何かを感じるはず。補い合える関係で、二人でいると不思議なほど居心地がいい。',
+      'まるで以前から知っていたような安心感。共鳴し合う波長が二人を引き寄せ、深い絆が生まれる相性。',
+    ],
+    mid: [
+      '違いはあるけれど、それが逆に魅力になる関係。お互いの個性が刺激になって、一緒に成長できるはず。',
+      '最初は少し戸惑うかも？でも時間をかけて理解し合えば、かけがえのない存在になる予感がする。',
+      '同じ夢を見る日もあれば、意見が違う日もある。でもそのバランスが二人にとっての「ちょうどよさ」。',
+    ],
+    lo: [
+      '真逆だからこそ、新しい世界を見せてくれる存在。刺激的な関係になりそう！',
+      '違いを乗り越えたとき、特別な絆が生まれる。簡単じゃないけど、挑戦する価値はある。',
+      'ぶつかることもあるかもしれないけど、お互いを鏡のように映し合う、学びの多い縁。',
+    ],
+  },
+  id:{
+    hi: [
+      'Kalian terhubung di tingkat jiwa. Nilai dan perasaan kalian begitu sejalan — ini bukan kebetulan, ini takdir.',
+      'Sejak pertama bertemu, ada sesuatu yang istimewa. Kalian saling melengkapi dengan cara yang terasa ajaib.',
+      'Rasa nyaman yang langsung hadir, seolah sudah saling mengenal lama. Getaran kalian beresonansi sempurna.',
+    ],
+    mid: [
+      'Ada perbedaan, tapi justru itu yang membuatnya menarik. Kalian bisa saling bertumbuh dan menginspirasi.',
+      'Mungkin butuh waktu untuk saling memahami, tapi begitu klik — hubungannya akan sangat berharga.',
+      'Kadang satu arah, kadang beda pendapat — tapi keseimbangan itu adalah kekuatan kalian.',
+    ],
+    lo: [
+      'Bertolak belakang, tapi justru membuka dunia baru satu sama lain. Hubungan yang penuh kejutan!',
+      'Tantangan ada, tapi ketika berhasil melewatinya, ikatan yang terbentuk akan sangat kuat.',
+      'Banyak yang bisa dipelajari satu sama lain. Perbedaan kalian adalah guru terbaik.',
+    ],
+  },
+  en:{
+    hi: [
+      "You're connected at a soul level. Your values and feelings align so naturally — this isn't coincidence, it's destiny.",
+      "From the first moment, something feels special. You complement each other in ways that feel almost magical.",
+      "An instant sense of comfort, as if you've known each other forever. Your wavelengths resonate perfectly.",
+    ],
+    mid: [
+      "Differences exist, but that's exactly what makes it interesting. You can grow and inspire each other.",
+      "It might take time to truly understand each other — but once you click, it becomes something truly precious.",
+      "Sometimes aligned, sometimes different — but that balance is your strength as a pair.",
+    ],
+    lo: [
+      "Opposites attract — you open up whole new worlds for each other. An exciting, surprising connection!",
+      "There will be challenges, but overcoming them together creates a bond that's incredibly strong.",
+      "So much to learn from each other. Your differences are your greatest teacher.",
+    ],
+  },
+};
+
+let loveState = {
+  answers: [],    // dim scores accumulated
+  qIndex: 0,
+  userName: '',
+};
+
+function loveFortune(){
+  loveState = {answers:[], qIndex:0, userName:''};
+  // Reset dims
+  loveState.dims = {E:0,I:0,N:0,S:0,F:0,T:0,J:0,P:0};
+
+  document.getElementById('app').innerHTML=`
+    <div class="card p-8 max-w-md mx-auto text-center fade-in">
+      <div class="w-14 h-14 rounded-2xl bg-pink-50 flex items-center justify-center mx-auto mb-4 text-3xl">💌</div>
+      <h2 class="text-xl font-extrabold text-gray-800 mb-1">${tr('love')}</h2>
+      <p class="text-gray-400 text-sm mb-6">
+        ${lang==='jp'?'8つの質問に答えて、あなたと運命のメンバーを見つけよう！':
+          lang==='id'?'Jawab 8 pertanyaan dan temukan member jodohmu!':
+          'Answer 8 questions and find your destined member!'}
+      </p>
+      <div class="mb-5">
+        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 text-left">
+          ${lang==='jp'?'あなたの名前':lang==='id'?'Namamu':'Your name'}
+        </label>
+        <input id="loveNameInput" type="text" maxlength="20"
+          placeholder="${lang==='jp'?'名前を入力…':lang==='id'?'Masukkan namamu…':'Enter your name…'}"
+          class="input-base text-center font-semibold">
+      </div>
+      <button onclick="startLoveQuiz()"
+        class="btn-primary w-full text-base" style="background:linear-gradient(135deg,#f472b6,#ec4899);">
+        ${lang==='jp'?'占いスタート 💕':lang==='id'?'Mulai Ramalan 💕':'Start Fortune 💕'}
+      </button>
+    </div>`;
+}
+
+function startLoveQuiz(){
+  const input = document.getElementById('loveNameInput');
+  loveState.userName = (input?.value||'').trim() || (lang==='jp'?'あなた':lang==='id'?'Kamu':'You');
+  loveState.dims = {E:0,I:0,N:0,S:0,F:0,T:0,J:0,P:0};
+  loveState.qIndex = 0;
+  renderLoveQuestion();
+}
+
+function renderLoveQuestion(){
+  const qi = loveState.qIndex;
+  const total = quizData.questions.length;
+  if(qi >= total){ computeLoveResult(); return; }
+
+  const q = quizData.questions[qi];
+  const pct = Math.round((qi/total)*100);
+
+  document.getElementById('app').innerHTML=`
+    <div class="max-w-lg mx-auto fade-in">
+      <!-- progress -->
+      <div class="card p-4 mb-4">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            ${lang==='jp'?`質問 ${qi+1} / ${total}`:lang==='id'?`Pertanyaan ${qi+1} / ${total}`:`Question ${qi+1} / ${total}`}
+          </span>
+          <span class="text-xs font-bold" style="color:#ec4899">${pct}%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:${pct}%;background:linear-gradient(90deg,#f9a8d4,#ec4899);"></div>
+        </div>
+      </div>
+
+      <!-- question -->
+      <div class="card p-6 mb-3">
+        <p class="font-bold text-gray-800 text-base mb-5 text-center leading-snug">${q[lang]}</p>
+        <div class="space-y-2.5">
+          ${q.opts.map((opt,oi)=>`
+            <button class="quiz-opt" onclick="answerLove(${oi})">
+              ${opt[lang]}
+            </button>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function answerLove(optIndex){
+  const q = quizData.questions[loveState.qIndex];
+  const dim = q.opts[optIndex].dim;
+  Object.keys(dim).forEach(k=>{ loveState.dims[k] = (loveState.dims[k]||0) + dim[k]; });
+  loveState.qIndex++;
+  renderLoveQuestion();
+}
+
+function computeLoveResult(){
+  const d = loveState.dims;
+  // Determine user MBTI from accumulated dims
+  const EI = d.E >= d.I ? 'E' : 'I';
+  const NS = d.N >= d.S ? 'N' : 'S';
+  const FT = d.F >= d.T ? 'F' : 'T';
+  const JP = d.J >= d.P ? 'J' : 'P';
+  const userMBTI = EI+NS+FT+JP;
+
+  // Score each member
+  const scored = members.map(m=>{
+    const mtype = memberMBTI[m.id];
+    const score = getMBTICompat(userMBTI, mtype);
+    // Add small jitter to avoid ties
+    return {...m, mbti:mtype, score: score + Math.random()*3};
+  }).sort((a,b)=>b.score-a.score);
+
+  const best = scored[0];
+  const rawScore = Math.round(best.score);
+  // Clamp display 60-99
+  const displayPct = Math.min(99, Math.max(60, rawScore));
+
+  // Pick narrative
+  const tier = displayPct>=85?'hi':displayPct>=70?'mid':'lo';
+  const narrs = compatNarrative[lang][tier];
+  const narr = narrs[Math.floor(Math.random()*narrs.length)];
+
+  renderLoveResult(best, userMBTI, displayPct, narr, scored.slice(1,4));
+}
+
+function renderLoveResult(best, userMBTI, pct, narr, runners){
+  // SVG ring math
+  const R=54, C=2*Math.PI*R;
+  const dash = (pct/100)*C;
+
+  document.getElementById('app').innerHTML=`
+    <div class="max-w-md mx-auto fade-in">
+      <div class="text-center mb-4">
+        <h2 class="text-xl font-extrabold text-gray-800">💌 ${tr('result')}</h2>
+        <p class="text-gray-400 text-sm">${loveState.userName} × ${best.name[lang]}</p>
+      </div>
+
+      <!-- Main card -->
+      <div id="loveResultCard" class="love-card p-6 mb-4">
+        <!-- Header -->
+        <div class="text-center mb-5">
+          <div class="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3"
+               style="background:rgba(236,72,153,0.1);color:#be185d;">
+            ${lang==='jp'?'あなたのMBTI':lang==='id'?'MBTI kamu':'Your MBTI'}: <span class="font-extrabold">${userMBTI}</span>
+          </div>
+        </div>
+
+        <!-- Member photo + ring -->
+        <div class="flex flex-col items-center mb-5">
+          <div class="relative mb-3" style="width:140px;height:140px;">
+            <svg width="140" height="140" style="position:absolute;top:0;left:0;transform:rotate(-90deg)">
+              <defs>
+                <linearGradient id="loveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style="stop-color:#f9a8d4"/>
+                  <stop offset="100%" style="stop-color:#ec4899"/>
+                </linearGradient>
+              </defs>
+              <circle cx="70" cy="70" r="${R}" class="pct-ring-bg"/>
+              <circle cx="70" cy="70" r="${R}" class="pct-ring"
+                stroke-dasharray="${C}" stroke-dashoffset="${C-dash}"
+                style="stroke:url(#loveGrad)"/>
+            </svg>
+            <img src="${best.img}"
+              class="rounded-full object-cover heart-pop"
+              style="width:116px;height:116px;position:absolute;top:12px;left:12px;border:3px solid white;box-shadow:0 4px 16px rgba(236,72,153,0.25)">
+          </div>
+          <div class="text-3xl font-extrabold" style="color:#be185d;">${pct}%</div>
+          <div class="text-xs text-gray-400 font-semibold mt-0.5">
+            ${lang==='jp'?'相性スコア':lang==='id'?'Skor kecocokan':'Compatibility score'}
+          </div>
+        </div>
+
+        <!-- Member name & MBTI -->
+        <div class="text-center mb-4">
+          <div class="text-xl font-extrabold text-gray-800">${best.name[lang]}</div>
+          <div class="inline-block text-xs font-bold px-2.5 py-0.5 rounded-full mt-1"
+               style="background:rgba(46,196,198,0.12);color:#1fa8aa;">
+            ${best.mbti}
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(236,72,153,0.2),transparent);margin-bottom:16px;"></div>
+
+        <!-- Narrative -->
+        <p class="text-gray-600 text-sm text-center leading-relaxed px-2">${narr}</p>
+
+        <!-- Runner-ups -->
+        <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(236,72,153,0.15),transparent);margin:16px 0;"></div>
+        <div class="text-xs font-bold text-center text-gray-400 uppercase tracking-wider mb-3">
+          ${lang==='jp'?'次点':lang==='id'?'Runner-up':'Runner-up'}
+        </div>
+        <div class="flex justify-center gap-4">
+          ${runners.map(m=>`
+            <div class="text-center">
+              <img src="${m.img}" class="w-12 h-12 object-cover rounded-lg mx-auto mb-1
+                         border-2 border-pink-100">
+              <div class="text-xs font-semibold text-gray-600 truncate" style="max-width:60px">${m.name[lang]}</div>
+              <div class="text-xs text-gray-400">${Math.min(99,Math.round(m.score))}%</div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3 justify-center">
+        <button onclick="shareToX('love',{member:'${best.name[lang]}',pct:${pct}})"
+          class="btn-primary" style="background:linear-gradient(135deg,#1DA1F2,#0c85d0);">
+          🐦 Share
+        </button>
+        <button onclick="downloadLoveCard()"
+          class="btn-primary" style="background:linear-gradient(135deg,#f472b6,#ec4899);">
+          ⬇ ${tr('download')}
+        </button>
+        <button onclick="loveFortune()" class="btn-secondary">🔄 ${tr('reset')}</button>
+      </div>
+    </div>`;
+}
+
+function downloadLoveCard(){
+  const el=document.getElementById('loveResultCard');
+  if(!el) return;
+  html2canvas(el,{useCORS:true,backgroundColor:'#fff5fb',scale:2.5}).then(canvas=>{
+    const a=document.createElement('a');
+    a.href=canvas.toDataURL('image/png');
+    a.download='love-fortune.png'; a.click();
   });
 }
 
