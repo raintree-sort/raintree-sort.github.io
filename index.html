@@ -542,18 +542,18 @@ function renderMemberResult(){
       </div>
 
       <!-- Podium Container -->
-      <div id="memberPodium" class="mb-5 space-y-3">
-        <!-- Rank 1 - Full width -->
-        <div class="card overflow-hidden relative group">
+      <div id="memberPodium" class="mb-5 space-y-2 max-w-md mx-auto">
+        <!-- Rank 1 - Smaller width -->
+        <div class="card overflow-hidden relative">
           <div class="relative">
-            <img src="${top1.img}" class="w-full object-cover" style="max-height:70vh;">
+            <img src="${top1.img}" class="w-full object-cover" style="max-height:35vh;">
             <!-- Overlay bottom gradient for text readability -->
-            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4">
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3">
               <div class="flex items-center justify-between">
                 <div>
-                  <div class="flex items-center gap-2 mb-1">
+                  <div class="flex items-center gap-1.5 mb-0.5">
                     ${rankBadge(1)}
-                    <span class="text-white font-extrabold text-lg">${top1.name[lang]}</span>
+                    <span class="text-white font-bold text-base">${top1.name[lang]}</span>
                   </div>
                   <div class="text-white/80 text-xs font-medium">🥇 No. 1 Champion</div>
                 </div>
@@ -562,19 +562,19 @@ function renderMemberResult(){
           </div>
         </div>
 
-        <!-- Rank 2 & 3 - Side by side -->
-        <div class="grid grid-cols-2 gap-3">
+        <!-- Rank 2 & 3 - Side by side, smaller -->
+        <div class="grid grid-cols-2 gap-2">
           <!-- Rank 2 -->
           <div class="card overflow-hidden relative">
             <div class="relative">
               <img src="${top2.img}" class="w-full aspect-square object-cover">
-              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3">
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-2">
                 <div class="flex flex-col">
-                  <div class="flex items-center gap-1.5 mb-0.5">
+                  <div class="flex items-center gap-1 mb-0.5">
                     ${rankBadge(2)}
-                    <span class="text-white font-bold text-sm">${top2.name[lang]}</span>
+                    <span class="text-white font-bold text-xs">${top2.name[lang]}</span>
                   </div>
-                  <div class="text-white/70 text-xs font-medium">🥈 Runner-up</div>
+                  <div class="text-white/70" style="font-size:10px;">🥈 Runner-up</div>
                 </div>
               </div>
             </div>
@@ -584,13 +584,13 @@ function renderMemberResult(){
           <div class="card overflow-hidden relative">
             <div class="relative">
               <img src="${top3.img}" class="w-full aspect-square object-cover">
-              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3">
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-2">
                 <div class="flex flex-col">
-                  <div class="flex items-center gap-1.5 mb-0.5">
+                  <div class="flex items-center gap-1 mb-0.5">
                     ${rankBadge(3)}
-                    <span class="text-white font-bold text-sm">${top3.name[lang]}</span>
+                    <span class="text-white font-bold text-xs">${top3.name[lang]}</span>
                   </div>
-                  <div class="text-white/70 text-xs font-medium">🥉 Third Place</div>
+                  <div class="text-white/70" style="font-size:10px;">🥉 Third Place</div>
                 </div>
               </div>
             </div>
@@ -832,24 +832,27 @@ function renderStage(){
   const isFrontRow=ri=>ri===formation.length-1;
   formation.forEach((row,ri)=>{
     const div=document.createElement('div');
-    div.className='flex justify-center gap-0.5';
+    div.className='flex justify-center gap-0';
     row.forEach((slot,ci)=>{
       const box=document.createElement('div');
       const isFront=isFrontRow(ri);
       const len=row.length;
       const isCenter=isFront&&(len%2===1?ci===Math.floor(len/2):ci===len/2-1||ci===len/2);
-      // Simple white box with border, highlight center with thicker border
-      box.className=`w-20 h-20 bg-white rounded flex items-center justify-center
+      // Smaller box with explicit inline size for better html2canvas rendering
+      box.style.width='64px';
+      box.style.height='64px';
+      box.className=`bg-white rounded flex items-center justify-center
                      cursor-pointer hover:bg-gray-50 transition flex-shrink-0
                      ${isCenter&&slot?'border-2 border-primary':'border border-gray-200'}`;
       box.onclick=()=>selectMember(ri,ci);
       if(slot){
         box.innerHTML=`
-          <div class="relative w-full h-full">
-            <img src="${slot.img}" class="w-full h-full object-cover rounded-sm">
-            <div class="absolute bottom-0 left-0 right-0 bg-black/60 text-white
-                        text-center py-0.5 truncate px-1"
-                 style="font-size:9px">${slot.name[lang]}</div>
+          <div style="position:relative;width:100%;height:100%;">
+            <img src="${slot.img}" style="width:100%;height:100%;object-fit:cover;aspect-ratio:1;border-radius:2px;">
+            <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);
+                        color:white;text-align:center;padding:2px 4px;font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+              ${slot.name[lang]}
+            </div>
           </div>`;
       } else {
         box.innerHTML=`<span class="text-xl text-gray-300">+</span>`;
@@ -904,7 +907,15 @@ function autoFill(){
 function downloadStage(){
   const stage=document.getElementById('stage');
   if(!stage) return;
-  html2canvas(stage,{useCORS:true,backgroundColor:'#ffffff'}).then(canvas=>{
+  // Get actual rendered dimensions
+  const rect = stage.getBoundingClientRect();
+  html2canvas(stage,{
+    useCORS:true,
+    backgroundColor:'#ffffff',
+    scale:2,
+    width:rect.width,
+    height:rect.height
+  }).then(canvas=>{
     const a=document.createElement('a');
     a.href=canvas.toDataURL('image/png');
     a.download='dream-senbatsu.png'; a.click();
@@ -1378,11 +1389,25 @@ function renderLoveResult(best, userMBTI, pct, narr, runners){
 
 function downloadLoveCard(){
   const el=document.getElementById('loveResultCard');
-  if(!el) return;
-  html2canvas(el,{useCORS:true,backgroundColor:'#fff5fb',scale:2.5}).then(canvas=>{
+  if(!el){
+    alert('Card not found. Please try again.');
+    return;
+  }
+  
+  // Simple approach without button state manipulation
+  html2canvas(el,{
+    useCORS:true,
+    backgroundColor:'#fff5fb',
+    scale:2,
+    logging:false
+  }).then(canvas=>{
     const a=document.createElement('a');
     a.href=canvas.toDataURL('image/png');
-    a.download='love-fortune.png'; a.click();
+    a.download='love-fortune.png';
+    a.click();
+  }).catch(err=>{
+    console.error('Download error:',err);
+    alert('Download failed. Please check your internet connection and try again.');
   });
 }
 
