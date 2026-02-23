@@ -3,12 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Rain Tree Space</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 <script>
   tailwind.config={theme:{extend:{
     colors:{primary:'#2ec4c6', primaryDark:'#1fa8aa', primaryLight:'#e6fafa'},
@@ -267,7 +270,7 @@ function tr(key){ return T[key]?T[key][lang]:key; }
    ===================================================== */
 const SUPABASE_URL = 'https://stxdidirwitbxoltmmrl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0eGRpZGlyd2l0YnhvbHRtbXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NDYyNDAsImV4cCI6MjA4NzIyMjI0MH0.eDGo9i-6JMTyrO0wZt3ca6w6kAzbsVQCMax0kNHUNHo';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const rainTreeDB = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* =====================================================
    MEMBERS & SONGS (Dynamic from Supabase)
@@ -280,7 +283,7 @@ let dataLoaded = false;
 async function loadData(){
   try {
     // Fetch members
-    const { data: membersData, error: membersError } = await supabase
+    const { data: membersData, error: membersError } = await rainTreeDB
       .from('members')
       .select('*')
       .order('id');
@@ -308,7 +311,7 @@ async function loadData(){
     }));
     
     // Fetch songs
-    const { data: songsData, error: songsError } = await supabase
+    const { data: songsData, error: songsError } = await rainTreeDB
       .from('songs')
       .select('*')
       .order('id');
@@ -445,7 +448,7 @@ async function showMemberProfile(memberId){
   // Fetch member photos
   let photos = [];
   try {
-    const { data, error } = await supabase
+    const { data, error } = await rainTreeDB
       .from('member_photos')
       .select('*')
       .eq('member_id', memberId)
@@ -1649,16 +1652,47 @@ function downloadLoveCard(){
    INIT
    ===================================================== */
 async function init(){
+  console.log('=== INIT START ===');
   renderNav();
+  
   // Show loading
-  document.getElementById('app').innerHTML = '<div class="text-center py-20"><div class="text-gray-400 mb-2">⏳ Loading...</div></div>';
+  document.getElementById('app').innerHTML = '<div class="text-center py-20"><div class="text-gray-400 mb-2">⏳ Loading data...</div></div>';
+  
+  // Check if Supabase is available
+  if(typeof window.supabase === 'undefined'){
+    console.error('Supabase SDK not loaded!');
+    document.getElementById('app').innerHTML = '<div class="text-center py-20"><div class="text-red-500 mb-2">❌ Error: Supabase library gagal dimuat. Refresh halaman.</div></div>';
+    return;
+  }
+  
+  console.log('Supabase SDK loaded, connecting...');
+  
   // Load data from Supabase
-  await loadData();
-  // Render home page
-  home();
+  try {
+    await loadData();
+    console.log('Data loaded successfully');
+    
+    if(!dataLoaded || members.length === 0){
+      console.error('No data loaded');
+      document.getElementById('app').innerHTML = '<div class="text-center py-20"><div class="text-red-500 mb-2">❌ Gagal memuat data dari database. Cek koneksi internet.</div></div>';
+      return;
+    }
+    
+    // Render home page
+    home();
+    console.log('=== INIT COMPLETE ===');
+    
+  } catch(error){
+    console.error('Init error:', error);
+    document.getElementById('app').innerHTML = `<div class="text-center py-20"><div class="text-red-500 mb-2">❌ Error: ${error.message}</div></div>`;
+  }
 }
 
-init();
+// Prevent multiple init calls
+if(!window.rainTreeInitialized){
+  window.rainTreeInitialized = true;
+  init();
+}
 </script>
 </body>
 </html>
