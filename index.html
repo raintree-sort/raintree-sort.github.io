@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   tailwind.config={theme:{extend:{
     colors:{primary:'#2ec4c6', primaryDark:'#1fa8aa', primaryLight:'#e6fafa'},
@@ -217,6 +218,16 @@
   </div>
 </div>
 
+<!-- MEMBER PROFILE MODAL -->
+<div id="profileModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+  <div class="modal-inner" style="max-width:700px;">
+    <button onclick="closeProfileModal()"
+      class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full
+             bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold transition text-sm z-10">✕</button>
+    <div id="profileContent"></div>
+  </div>
+</div>
+
 <script>
 /* =====================================================
    LANGUAGE
@@ -225,6 +236,7 @@ let lang = 'jp';
 
 const T = {
   home:       {id:'Home',          en:'Home',          jp:'ホーム'},
+  members:    {id:'Members',       en:'Members',       jp:'メンバー'},
   member:     {id:'Member Sorter', en:'Member Sorter',  jp:'メンバーソート'},
   love:       {id:'Love Fortune',  en:'Love Fortune',   jp:'恋愛占い'},
   song:       {id:'Song Sorter',   en:'Song Sorter',    jp:'楽曲ソート'},
@@ -251,41 +263,72 @@ const T = {
 function tr(key){ return T[key]?T[key][lang]:key; }
 
 /* =====================================================
-   MEMBERS
+   SUPABASE INIT
    ===================================================== */
-const members = [
-  {id:1,  name:{id:'Asamiya Hinata',  en:'Asamiya Hinata',  jp:'朝宮日向'}, img:'assets/members/Asamiya_Hinata.jpeg'},
-  {id:2,  name:{id:'Ayase Kotori',    en:'Ayase Kotori',    jp:'綾瀬ことり'},img:'assets/members/Ayase_Kotori.jpeg'},
-  {id:3,  name:{id:'Ichihara Tsumugi',en:'Ichihara Tsumugi',jp:'市原紬希'}, img:'assets/members/Ichihara_Tsumugi.jpeg'},
-  {id:4,  name:{id:'Endo Rino',       en:'Endo Rino',       jp:'遠藤莉乃'}, img:'assets/members/Endo_Rino.jpeg'},
-  {id:5,  name:{id:'Katase Manaka',   en:'Katase Manaka',   jp:'片瀬真花'}, img:'assets/members/Katase_Manaka.jpeg'},
-  {id:6,  name:{id:'Kato Shu',        en:'Kato Shu',        jp:'加藤柊'},   img:'assets/members/Kato_Shu.jpeg'},
-  {id:7,  name:{id:'Kurosawa Karen',  en:'Kurosawa Karen',  jp:'黒澤禾恋'}, img:'assets/members/Kurosawa_Karen.jpeg'},
-  {id:8,  name:{id:'Sato Rica',       en:'Sato Rica',       jp:'佐藤莉華'}, img:'assets/members/Sato_Rica.jpeg'},
-  {id:9,  name:{id:'Suzuno Mio',      en:'Suzuno Mio',      jp:'鈴野みお'}, img:'assets/members/Suzuno_Mio.jpeg'},
-  {id:10, name:{id:'Nakamata Miki',   en:'Nakamata Miki',   jp:'仲俣美希'}, img:'assets/members/Nakamata_Miki.jpeg'},
-  {id:11, name:{id:'Nagase Mari',     en:'Nagase Mari',     jp:'永瀬真梨'}, img:'assets/members/Nagase_Mari.jpeg'},
-  {id:12, name:{id:'Niino Fuka',      en:'Niino Fuka',      jp:'新野楓果'}, img:'assets/members/Niino_Fuka.jpeg'},
-  {id:13, name:{id:'Hashimoto Maki',  en:'Hashimoto Maki',  jp:'橋本真希'}, img:'assets/members/Hashimoto_Maki.jpeg'},
-  {id:14, name:{id:'Hayama Rico',     en:'Hayama Rico',     jp:'葉山莉瑚'}, img:'assets/members/Hayama_Rico.jpeg'},
-  {id:15, name:{id:'Mizuno Noa',      en:'Mizuno Noa',      jp:'水野乃愛'}, img:'assets/members/Mizuno_Noa.jpeg'},
-  {id:16, name:{id:'Momose Suzuna',   en:'Momose Suzuna',   jp:'百瀬紗菜'}, img:'assets/members/Momose_Suzuna.jpeg'},
-  {id:17, name:{id:'Yoshikawa Umi',   en:'Yoshikawa Umi',   jp:'吉川海未'}, img:'assets/members/Yoshikawa_Umi.jpeg'},
-];
+const SUPABASE_URL = 'https://stxdidirwitbxoltmmrl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0eGRpZGlyd2l0YnhvbHRtbXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NDYyNDAsImV4cCI6MjA4NzIyMjI0MH0.eDGo9i-6JMTyrO0wZt3ca6w6kAzbsVQCMax0kNHUNHo';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* =====================================================
-   SONGS
+   MEMBERS & SONGS (Dynamic from Supabase)
    ===================================================== */
-const songs = [
-  {id:1, title:'好きだよとどっちが先に言うのか？', spotifyId:'5Xr6WaDKhUfgULKQLoGvBE'},
-  {id:2, title:'元気予報',                         spotifyId:'7jW6T9MCQVgxJJvXyf7K6x'},
-  {id:3, title:'定点観測',                         spotifyId:'0Tu4xsLz3NJdm8imn7uJtr'},
-  {id:4, title:'恋愛変格活用',                     spotifyId:'6MOfU2rS6rBBrRwt78gAsm'},
-  {id:5, title:'つまり',                           spotifyId:'5z0W1shvZp5NGGI25Oniy2'},
-  {id:6, title:'3秒ルール',                        spotifyId:'1Cmp9PkwMbcKwJUdJaAee1'},
-  {id:7, title:'ILU',                              spotifyId:'4mBzfzsfsDkZ0TzmuJEiZ2'},
-  {id:8, title:'僕のオーロラ',                     spotifyId:'5MQMSgVCzhUruxxAkVzK5H'},
-];
+let members = [];
+let songs = [];
+let dataLoaded = false;
+
+// Fetch data from Supabase
+async function loadData(){
+  try {
+    // Fetch members
+    const { data: membersData, error: membersError } = await supabase
+      .from('members')
+      .select('*')
+      .order('id');
+    
+    if(membersError) throw membersError;
+    
+    // Transform to match existing structure
+    members = membersData.map(m => ({
+      id: m.id,
+      name: {
+        id: m.name_id,
+        en: m.name_en,
+        jp: m.name_jp
+      },
+      img: m.photo_url || `assets/members/${m.name_en.replace(' ', '_')}.jpeg`,
+      mbti: m.mbti,
+      birthdate: m.birthdate,
+      height: m.height_cm,
+      prefecture: m.prefecture,
+      bloodType: m.blood_type,
+      lightstick: m.lightstick_color,
+      songs: m.song_participation,
+      trivia: m.trivia,
+      graduated: m.is_graduated
+    }));
+    
+    // Fetch songs
+    const { data: songsData, error: songsError } = await supabase
+      .from('songs')
+      .select('*')
+      .order('id');
+    
+    if(songsError) throw songsError;
+    
+    songs = songsData.map(s => ({
+      id: s.id,
+      title: s.title,
+      spotifyId: s.spotify_id
+    }));
+    
+    dataLoaded = true;
+    console.log('Data loaded:', members.length, 'members,', songs.length, 'songs');
+    
+  } catch(error){
+    console.error('Error loading data:', error);
+    alert('Gagal memuat data dari server. Silakan refresh halaman.');
+  }
+}
 
 /* =====================================================
    NAV
@@ -293,7 +336,7 @@ const songs = [
 let currentPage = 'home';
 
 function renderNav(){
-  const pages = ['home','member','song','senbatsu','love'];
+  const pages = ['home','members','member','song','senbatsu','love'];
   document.getElementById('nav').innerHTML = pages.map(p =>
     `<button class="nav-btn ${currentPage===p?'active':''}" onclick="go('${p}')">${tr(p)}</button>`
   ).join('');
@@ -303,12 +346,12 @@ function changeLang(l){
   lang=l;
   renderNav();
   // Re-render halaman yang sedang aktif
-  ({home, member:memberSorterPage, song:songSorterPage, senbatsu, love:loveFortune})[currentPage]?.();
+  ({home, members:memberListPage, member:memberSorterPage, song:songSorterPage, senbatsu, love:loveFortune})[currentPage]?.();
 }
 
 function go(p){
   currentPage=p; renderNav();
-  ({home, member:memberSorterPage, song:songSorterPage, senbatsu, love:loveFortune})[p]?.();
+  ({home, members:memberListPage, member:memberSorterPage, song:songSorterPage, senbatsu, love:loveFortune})[p]?.();
 }
 
 /* =====================================================
@@ -324,8 +367,9 @@ function home(){
       <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight mb-1">Rain Tree Space</h1>
       <p class="text-gray-400 text-sm font-medium">ファンのためのファンツール</p>
     </div>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 max-w-4xl mx-auto">
       ${[
+        {p:'members',  icon:'👥', label:tr('members'),  sub:{id:'Profil lengkap member',en:'Complete member profiles',jp:'メンバープロフィール'}},
         {p:'member',  icon:'👑', label:tr('member'),  sub:{id:'Battle & ranking member',en:'Battle & ranking member',jp:'メンバーをバトルでランキング'}},
         {p:'song',    icon:'🎵', label:tr('song'),    sub:{id:'Battle lagu favoritmu', en:'Battle your favorite songs',jp:'曲をバトルでランキング'}},
         {p:'senbatsu',icon:'⭐', label:tr('senbatsu'),sub:{id:'Susun formasi impianmu', en:'Build your dream formation',jp:'夢のフォーメーションを組もう'}},
@@ -343,6 +387,205 @@ function home(){
         </button>
       `).join('')}
     </div>`;
+}
+
+/* =====================================================
+   MEMBER LIST & PROFILE
+   ===================================================== */
+function memberListPage(){
+  if(!dataLoaded || members.length === 0){
+    document.getElementById('app').innerHTML = '<div class="text-center py-20 text-gray-400">Loading members...</div>';
+    return;
+  }
+  
+  const activeMembers = members.filter(m => !m.graduated);
+  const graduatedMembers = members.filter(m => m.graduated);
+  
+  document.getElementById('app').innerHTML = `
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-2xl font-extrabold text-gray-800 mb-6 text-center">${tr('members')}</h2>
+      
+      <!-- Active Members -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
+        ${activeMembers.map(m => `
+          <div class="card card-hover cursor-pointer" onclick="showMemberProfile(${m.id})">
+            <div style="background-image:url('${m.img}');background-size:cover;background-position:center;
+                        padding-bottom:120%;border-radius:12px 12px 0 0;"></div>
+            <div class="p-3 text-center">
+              <div class="font-bold text-sm text-gray-800 truncate">${m.name[lang]}</div>
+              <div class="text-xs text-gray-400 mt-1">${m.mbti}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      
+      ${graduatedMembers.length > 0 ? `
+        <h3 class="text-lg font-bold text-gray-600 mb-4">${lang==='jp'?'卒業メンバー':lang==='id'?'Anggota Lulus':'Graduated Members'}</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 opacity-60">
+          ${graduatedMembers.map(m => `
+            <div class="card cursor-pointer" onclick="showMemberProfile(${m.id})">
+              <div style="background-image:url('${m.img}');background-size:cover;background-position:center;
+                          padding-bottom:120%;border-radius:12px 12px 0 0;filter:grayscale(50%);"></div>
+              <div class="p-3 text-center">
+                <div class="font-bold text-sm text-gray-800 truncate">${m.name[lang]}</div>
+                <div class="text-xs text-gray-400 mt-1">${m.mbti}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+async function showMemberProfile(memberId){
+  const member = members.find(m => m.id === memberId);
+  if(!member) return;
+  
+  // Fetch member photos
+  let photos = [];
+  try {
+    const { data, error } = await supabase
+      .from('member_photos')
+      .select('*')
+      .eq('member_id', memberId)
+      .order('year', { ascending: false })
+      .order('display_order');
+    
+    if(!error && data) photos = data;
+  } catch(err){
+    console.error('Error loading photos:', err);
+  }
+  
+  // Calculate age if birthdate exists
+  let ageText = '';
+  if(member.birthdate){
+    const birth = new Date(member.birthdate);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if(monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+    
+    const months = {jp:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+                    id:['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'],
+                    en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']};
+    const monthName = months[lang][birth.getMonth()];
+    const dateStr = lang==='jp' ? `${birth.getFullYear()}年${monthName}${birth.getDate()}日` :
+                    `${birth.getDate()} ${monthName} ${birth.getFullYear()}`;
+    ageText = `${dateStr} (${age} ${lang==='jp'?'歳':lang==='id'?'tahun':'y.o'})`;
+  }
+  
+  document.getElementById('profileContent').innerHTML = `
+    <div class="relative">
+      <!-- Header Image -->
+      <div style="background-image:url('${member.img}');background-size:cover;background-position:center;
+                  height:300px;border-radius:12px 12px 0 0;"></div>
+      
+      <!-- Profile Info -->
+      <div class="p-6">
+        <h2 class="text-2xl font-extrabold text-gray-800 mb-1">${member.name[lang]}</h2>
+        <div class="text-gray-500 text-sm mb-4">
+          ${lang==='jp' ? member.name.jp : lang==='id' ? member.name.id : member.name.en}
+          ${member.graduated ? ` (${lang==='jp'?'卒業':lang==='id'?'Lulus':'Graduated'})` : ''}
+        </div>
+        
+        <!-- Basic Info Grid -->
+        <div class="grid grid-cols-2 gap-3 mb-5">
+          ${member.birthdate ? `
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <div class="text-xs text-gray-500 font-semibold mb-1">${lang==='jp'?'生年月日':lang==='id'?'Tanggal Lahir':'Birthday'}</div>
+              <div class="text-sm font-bold text-gray-800">${ageText}</div>
+            </div>
+          ` : ''}
+          
+          ${member.height ? `
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <div class="text-xs text-gray-500 font-semibold mb-1">${lang==='jp'?'身長':lang==='id'?'Tinggi':'Height'}</div>
+              <div class="text-sm font-bold text-gray-800">${member.height} cm</div>
+            </div>
+          ` : ''}
+          
+          ${member.prefecture ? `
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <div class="text-xs text-gray-500 font-semibold mb-1">${lang==='jp'?'出身地':lang==='id'?'Asal':'Hometown'}</div>
+              <div class="text-sm font-bold text-gray-800">${member.prefecture}</div>
+            </div>
+          ` : ''}
+          
+          ${member.bloodType ? `
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <div class="text-xs text-gray-500 font-semibold mb-1">${lang==='jp'?'血液型':lang==='id'?'Gol. Darah':'Blood Type'}</div>
+              <div class="text-sm font-bold text-gray-800">${member.bloodType}</div>
+            </div>
+          ` : ''}
+          
+          ${member.mbti ? `
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <div class="text-xs text-gray-500 font-semibold mb-1">MBTI</div>
+              <div class="text-sm font-bold text-gray-800">${member.mbti}</div>
+            </div>
+          ` : ''}
+          
+          ${member.lightstick ? `
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <div class="text-xs text-gray-500 font-semibold mb-1">${lang==='jp'?'ペンライトカラー':lang==='id'?'Warna Lightstick':'Lightstick Color'}</div>
+              <div class="text-sm font-bold text-gray-800">${member.lightstick}</div>
+            </div>
+          ` : ''}
+        </div>
+        
+        <!-- Song Participation -->
+        ${member.songs ? `
+          <div class="mb-5">
+            <h3 class="text-sm font-bold text-gray-700 mb-2">${lang==='jp'?'楽曲参加':lang==='id'?'Partisipasi Lagu':'Song Participation'}</h3>
+            <div class="bg-primaryLight/30 p-4 rounded-lg text-sm text-gray-700 leading-relaxed" style="white-space:pre-line;">${member.songs}</div>
+          </div>
+        ` : ''}
+        
+        <!-- Photo Gallery -->
+        ${photos.length > 0 ? `
+          <div class="mb-5">
+            <h3 class="text-sm font-bold text-gray-700 mb-2">${lang==='jp'?'フォトギャラリー':lang==='id'?'Galeri Foto':'Photo Gallery'}</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              ${photos.map(p => `
+                <div class="card overflow-hidden p-0 cursor-pointer hover:shadow-lg transition" onclick="viewPhotoFull('${p.photo_url}')">
+                  <div style="background-image:url('${p.photo_url}');background-size:cover;background-position:center;
+                              padding-bottom:120%;"></div>
+                  ${p.caption || p.year ? `
+                    <div class="p-2 bg-white">
+                      ${p.caption ? `<div class="text-xs font-semibold text-gray-700 truncate">${p.caption}</div>` : ''}
+                      ${p.year ? `<div class="text-xs text-gray-400">${p.year}</div>` : ''}
+                    </div>
+                  ` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+        
+        <!-- Trivia -->
+        ${member.trivia ? `
+          <div>
+            <h3 class="text-sm font-bold text-gray-700 mb-2">Trivia</h3>
+            <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-700 leading-relaxed" style="white-space:pre-line;">${member.trivia}</div>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('profileModal').classList.remove('hidden');
+  document.getElementById('profileModal').classList.add('flex');
+}
+
+function viewPhotoFull(url){
+  // Simple fullscreen view - could be enhanced with lightbox
+  window.open(url, '_blank');
+}
+
+function closeProfileModal(){
+  document.getElementById('profileModal').classList.add('hidden');
+  document.getElementById('profileModal').classList.remove('flex');
 }
 
 /* =====================================================
@@ -542,18 +785,17 @@ function renderMemberResult(){
       </div>
 
       <!-- Podium Container -->
-      <div id="memberPodium" class="mb-5 space-y-2 max-w-md mx-auto">
-        <!-- Rank 1 - Smaller width -->
+      <div id="memberPodium" class="mb-5 space-y-2 max-w-xs mx-auto">
+        <!-- Rank 1 - Larger square -->
         <div class="card overflow-hidden relative">
-          <div class="relative">
-            <img src="${top1.img}" class="w-full object-cover" style="max-height:35vh;">
+          <div class="relative" style="background-image:url('${top1.img}');background-size:cover;background-position:center;padding-bottom:100%;">
             <!-- Overlay bottom gradient for text readability -->
             <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3">
               <div class="flex items-center justify-between">
                 <div>
                   <div class="flex items-center gap-1.5 mb-0.5">
                     ${rankBadge(1)}
-                    <span class="text-white font-bold text-base">${top1.name[lang]}</span>
+                    <span class="text-white font-bold text-sm">${top1.name[lang]}</span>
                   </div>
                   <div class="text-white/80 text-xs font-medium">🥇 No. 1 Champion</div>
                 </div>
@@ -562,12 +804,11 @@ function renderMemberResult(){
           </div>
         </div>
 
-        <!-- Rank 2 & 3 - Side by side, smaller -->
+        <!-- Rank 2 & 3 - Side by side, smaller squares -->
         <div class="grid grid-cols-2 gap-2">
           <!-- Rank 2 -->
           <div class="card overflow-hidden relative">
-            <div class="relative">
-              <img src="${top2.img}" class="w-full aspect-square object-cover">
+            <div class="relative" style="background-image:url('${top2.img}');background-size:cover;background-position:center;padding-bottom:100%;">
               <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-2">
                 <div class="flex flex-col">
                   <div class="flex items-center gap-1 mb-0.5">
@@ -582,8 +823,7 @@ function renderMemberResult(){
 
           <!-- Rank 3 -->
           <div class="card overflow-hidden relative">
-            <div class="relative">
-              <img src="${top3.img}" class="w-full aspect-square object-cover">
+            <div class="relative" style="background-image:url('${top3.img}');background-size:cover;background-position:center;padding-bottom:100%;">
               <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-2">
                 <div class="flex flex-col">
                   <div class="flex items-center gap-1 mb-0.5">
@@ -847,8 +1087,8 @@ function renderStage(){
       box.onclick=()=>selectMember(ri,ci);
       if(slot){
         box.innerHTML=`
-          <div style="position:relative;width:100%;height:100%;">
-            <img src="${slot.img}" style="width:100%;height:100%;object-fit:cover;aspect-ratio:1;border-radius:2px;">
+          <div style="position:relative;width:100%;height:100%;background-image:url('${slot.img}');
+                      background-size:cover;background-position:center;border-radius:2px;">
             <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);
                         color:white;text-align:center;padding:2px 4px;font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
               ${slot.name[lang]}
@@ -1295,10 +1535,6 @@ function computeLoveResult(){
 }
 
 function renderLoveResult(best, userMBTI, pct, narr, runners){
-  // SVG ring math
-  const R=54, C=2*Math.PI*R;
-  const dash = (pct/100)*C;
-
   document.getElementById('app').innerHTML=`
     <div class="max-w-md mx-auto fade-in">
       <div class="text-center mb-4">
@@ -1316,24 +1552,19 @@ function renderLoveResult(best, userMBTI, pct, narr, runners){
           </div>
         </div>
 
-        <!-- Member photo + ring -->
+        <!-- Member photo + CSS ring -->
         <div class="flex flex-col items-center mb-5">
           <div class="relative mb-3" style="width:140px;height:140px;">
-            <svg width="140" height="140" style="position:absolute;top:0;left:0;transform:rotate(-90deg)">
-              <defs>
-                <linearGradient id="loveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" style="stop-color:#f9a8d4"/>
-                  <stop offset="100%" style="stop-color:#ec4899"/>
-                </linearGradient>
-              </defs>
-              <circle cx="70" cy="70" r="${R}" class="pct-ring-bg"/>
-              <circle cx="70" cy="70" r="${R}" class="pct-ring"
-                stroke-dasharray="${C}" stroke-dashoffset="${C-dash}"
-                style="stroke:url(#loveGrad)"/>
-            </svg>
-            <img src="${best.img}"
-              class="rounded-full object-cover heart-pop"
-              style="width:116px;height:116px;position:absolute;top:12px;left:12px;border:3px solid white;box-shadow:0 4px 16px rgba(236,72,153,0.25)">
+            <!-- CSS-based ring (more reliable for html2canvas) -->
+            <div style="position:absolute;top:0;left:0;width:140px;height:140px;border-radius:50%;
+                        background:conic-gradient(from 0deg, #f9a8d4 0%, #ec4899 ${pct}%, #fce7f3 ${pct}% 100%);
+                        padding:12px;">
+              <!-- Photo as background -->
+              <div style="width:116px;height:116px;border-radius:50%;
+                          background-image:url('${best.img}');background-size:cover;background-position:center;
+                          border:3px solid white;box-shadow:0 4px 16px rgba(236,72,153,0.25);">
+              </div>
+            </div>
           </div>
           <div class="text-3xl font-extrabold" style="color:#be185d;">${pct}%</div>
           <div class="text-xs text-gray-400 font-semibold mt-0.5">
@@ -1364,8 +1595,9 @@ function renderLoveResult(best, userMBTI, pct, narr, runners){
         <div class="flex justify-center gap-4">
           ${runners.map(m=>`
             <div class="text-center">
-              <img src="${m.img}" class="w-12 h-12 object-cover rounded-lg mx-auto mb-1
-                         border-2 border-pink-100">
+              <div style="width:48px;height:48px;border-radius:8px;margin:0 auto 4px;
+                          background-image:url('${m.img}');background-size:cover;background-position:center;
+                          border:2px solid #fce7f3;"></div>
               <div class="text-xs font-semibold text-gray-600 truncate" style="max-width:60px">${m.name[lang]}</div>
               <div class="text-xs text-gray-400">${Math.min(99,Math.round(m.score))}%</div>
             </div>`).join('')}
@@ -1394,12 +1626,14 @@ function downloadLoveCard(){
     return;
   }
   
-  // Simple approach without button state manipulation
+  // Allow taint for background-image CORS support
   html2canvas(el,{
     useCORS:true,
+    allowTaint:true,
     backgroundColor:'#fff5fb',
     scale:2,
-    logging:false
+    logging:false,
+    foreignObjectRendering:false
   }).then(canvas=>{
     const a=document.createElement('a');
     a.href=canvas.toDataURL('image/png');
@@ -1407,15 +1641,24 @@ function downloadLoveCard(){
     a.click();
   }).catch(err=>{
     console.error('Download error:',err);
-    alert('Download failed. Please check your internet connection and try again.');
+    alert('Download failed: '+err.message);
   });
 }
 
 /* =====================================================
    INIT
    ===================================================== */
-renderNav();
-home();
+async function init(){
+  renderNav();
+  // Show loading
+  document.getElementById('app').innerHTML = '<div class="text-center py-20"><div class="text-gray-400 mb-2">⏳ Loading...</div></div>';
+  // Load data from Supabase
+  await loadData();
+  // Render home page
+  home();
+}
+
+init();
 </script>
 </body>
 </html>
